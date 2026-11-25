@@ -2783,3 +2783,157 @@ test('Codex UI hides disabled response toolbar during mid-turn follow-up and ren
 
   ctx.__agyPowertools.dispose();
 });
+
+test('Right-clicking model-selector-trigger opens Thinking effort picker for multi-tier models and is no-op otherwise', async () => {
+  const source = readFileSync(new URL('../lib/native-ui.js', import.meta.url), 'utf8');
+  const docListeners = new Map();
+  const selectedEfforts = [];
+  let activePicker = null;
+  const renderedMenus = [];
+  let lastMount = null;
+
+  const triggerBtn = {
+    dataset: { testid: 'model-selector-trigger' },
+    getBoundingClientRect: () => ({ left: 120, top: 680, right: 280, bottom: 708, width: 160, height: 28 }),
+    closest: sel => (sel === '[data-testid="model-selector-trigger"]' ? triggerBtn : null)
+  };
+  const labelChild = {
+    closest: sel => (sel === '[data-testid="model-selector-trigger"]' ? triggerBtn : null)
+  };
+
+  const makeEl = (tag = 'div') => ({
+    tagName: tag.toUpperCase(),
+    dataset: {},
+    style: {},
+    className: '',
+    isConnected: true,
+    children: [],
+    append() {},
+    appendChild() {},
+    remove() {},
+    setAttribute() {},
+    getAttribute: () => null,
+    removeAttribute() {},
+    hasAttribute: () => false,
+    toggleAttribute() {},
+    querySelector: () => null,
+    querySelectorAll: () => []
+  });
+
+  const body = makeEl('body');
+  const ctx = vm.createContext({
+    document: {
+      readyState: 'complete',
+      head: makeEl('head'),
+      body,
+      documentElement: { toggleAttribute() {}, removeAttribute() {}, setAttribute() {}, style: { setProperty() {}, removeProperty() {} } },
+      createElement: tag => makeEl(tag),
+      addEventListener(type, fn) { if (!docListeners.has(type)) docListeners.set(type, []); docListeners.get(type).push(fn); },
+      removeEventListener() {},
+      querySelector: () => null,
+      querySelectorAll: () => []
+    },
+    window: { addEventListener() {}, removeEventListener() {}, innerWidth: 1280, innerHeight: 800 },
+    navigator: {},
+    location: { pathname: '/' },
+    AbortController,
+    React: {
+      Fragment: Symbol('Fragment'),
+      createElement: (type, props, ...children) => ({ type, props: props || {}, children: children.flat() }),
+      useState: init => [typeof init === 'function' ? init() : init, () => {}],
+      useRef: init => ({ current: init }),
+      useEffect: () => {}
+    },
+    ReactDOM: {
+      createRoot: mount => ({
+        render(vnode) { lastMount = mount; renderedMenus.push(vnode); },
+        unmount() { lastMount = null; }
+      })
+    },
+    HC: () => null,
+    __agyNativeAdapter: {
+      wrap: el => el,
+      executionState: () => null,
+      capabilities: () => ({}),
+      modelEffortPicker: el => (el === triggerBtn ? activePicker : null),
+      setEnabled() {}, setStageUpdates() {}, setCodexProgress() {}, setCodexComposerMedia() {}, setUiLanguage() {}, setHdImages() {}, setEfficientIO() {}, setContextLimit() {}, setSidebarProjectLimit() {},
+      dispose() {}
+    },
+    __agyPowertoolsHost: raw => {
+      const msg = JSON.parse(raw);
+      if (msg.method === 'settings.get') ctx.__agyPowertoolsReceive(msg.id, { enabled: true, codexStyle: true });
+      else ctx.__agyPowertoolsReceive(msg.id, {});
+    },
+    MutationObserver: class { observe() {} disconnect() {} },
+    setInterval: () => 1,
+    clearInterval: () => {},
+    setTimeout: fn => { if (typeof fn === 'function') fn(); return 1; },
+    clearTimeout: () => {}
+  });
+  vm.runInContext(source, ctx);
+  await new Promise(r => setImmediate(r));
+  await new Promise(r => setImmediate(r));
+
+  const fireCtx = target => {
+    let prevented = false, stopped = false;
+    for (const fn of docListeners.get('contextmenu') || []) {
+      fn({
+        target,
+        clientX: 150,
+        clientY: 690,
+        preventDefault() { prevented = true; },
+        stopPropagation() { stopped = true; }
+      });
+    }
+    return { prevented, stopped };
+  };
+
+  // 1. Single-tier model (activePicker = null) -> completely no-op
+  const noopRes = fireCtx(labelChild);
+  assert.equal(noopRes.prevented, false);
+  assert.equal(noopRes.stopped, false);
+  assert.equal(renderedMenus.length, 0);
+
+  // 2. Multi-tier model -> opens Thinking effort picker and selects tier
+  activePicker = {
+    baseLabel: 'Gemini 4 Hydrogen',
+    currentEffort: 'medium',
+    options: [
+      { effort: 'low', label: 'Low', selected: false },
+      { effort: 'medium', label: 'Medium', selected: true, quotaLow: true },
+      { effort: 'high', label: 'High', selected: false, quotaExhausted: true },
+      { effort: 'xhigh', label: 'Extra', selected: false }
+    ],
+    select: eff => { selectedEfforts.push(eff); return true; }
+  };
+  const openRes = fireCtx(labelChild);
+  assert.equal(openRes.prevented, true);
+  assert.equal(openRes.stopped, true);
+  assert.equal(renderedMenus.length, 1);
+
+  const expandVnode = node => {
+    if (!node || typeof node !== 'object') return node;
+    if (typeof node.type === 'function') return expandVnode(node.type({ ...(node.props || {}), children: node.children }));
+    return { ...node, children: (node.children || []).map(expandVnode) };
+  };
+  const findAllTestId = (node, id, out = []) => {
+    if (!node || typeof node !== 'object') return out;
+    if (node.props?.['data-testid'] === id) out.push(node);
+    for (const c of Array.isArray(node.children) ? node.children : [node.children]) findAllTestId(c, id, out);
+    return out;
+  };
+  const tree = expandVnode(renderedMenus[0]);
+  const menuNode = findAllTestId(tree, 'agy-model-effort-menu')[0];
+  assert.ok(menuNode);
+  const optionNodes = findAllTestId(tree, 'agy-model-effort-option');
+  assert.equal(optionNodes.length, 4);
+  assert.equal(optionNodes[1].props['aria-checked'], 'true');
+  assert.equal(optionNodes[1].props['data-effort'], 'medium');
+
+  const xhighBtn = optionNodes.find(n => n.props['data-effort'] === 'xhigh');
+  xhighBtn.props.onClick({ preventDefault() {}, stopPropagation() {} });
+  assert.deepEqual(selectedEfforts, ['xhigh']);
+  assert.equal(lastMount, null);
+
+  ctx.__agyPowertools.dispose();
+});

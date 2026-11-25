@@ -1931,3 +1931,91 @@ test('codexComposerMedia intercepts quotes into annotation store, keeps @file pa
   unsub();
   adapter.dispose();
 });
+
+test('modelEffortPicker resolves multi-tier models cleanly, ignores single-tier/locked triggers, and switches effort via setSelectedModel', () => {
+  const optLow = { label: 'Gemini 4 Hydrogen (Low)', modelId: 'gemini-4-hydrogen-low', quotaInfo: { remainingFraction: 0.8 } };
+  const optMed = { label: 'Gemini 4 Hydrogen (Medium)', modelId: 'gemini-4-hydrogen-medium', quotaInfo: { remainingFraction: 0.15 } };
+  const optHigh = { label: 'Gemini 4 Hydrogen (High)', modelId: 'gemini-4-hydrogen-high', quotaInfo: { remainingFraction: 0 } };
+  const optXHigh = { label: 'Gemini 4 Hydrogen (Extra)', modelId: 'gemini-4-hydrogen-xhigh', quotaInfo: { remainingFraction: 0.9 } };
+  const singleModel = { label: 'Claude Sonnet 4', modelId: 'claude-sonnet-4' };
+
+  const selectedCalls = [];
+  let ctxValue = {
+    selectedModel: optMed,
+    setSelectedModel: opt => selectedCalls.push(opt),
+    modelOptions: [optLow, optMed, optHigh, optXHigh, singleModel],
+    userStatus: {
+      cascadeModelConfigData: {
+        groupedModels: {
+          'gemini-4-hydrogen': {
+            displayName: 'Gemini 4 Hydrogen',
+            supportedThinkingLevels: [
+              { thinkingSuffix: 'low', thinkingDisplayName: 'Low' },
+              { thinkingSuffix: 'medium', thinkingDisplayName: 'Medium' },
+              { thinkingSuffix: 'high', thinkingDisplayName: 'High' },
+              { thinkingSuffix: 'xhigh', thinkingDisplayName: 'Extra' }
+            ]
+          }
+        },
+        clientModelConfigs: [optLow, optMed, optHigh, optXHigh, singleModel]
+      }
+    },
+    effortIndex: new Map([
+      ['gemini-4-hydrogen', new Map([['low', optLow], ['medium', optMed], ['high', optHigh], ['xhigh', optXHigh]])]
+    ])
+  };
+
+  let isLocked = false;
+  const triggerBtn = {
+    getAttribute: k => (k === 'data-testid' ? 'model-selector-trigger' : (k === 'aria-disabled' && isLocked ? 'true' : null)),
+    closest: sel => (sel === '[data-testid="model-selector-trigger"]' ? triggerBtn : null),
+    '__reactFiber$model': { tag: 10, memoizedProps: { value: ctxValue }, return: null }
+  };
+  const context = vm.createContext({
+    document: { querySelector: () => null },
+    I: {},
+    tc: (_, v) => structuredClone(v),
+    Wb: (_, v) => v
+  });
+  vm.runInContext(readFileSync(new URL('../lib/native-client.js', import.meta.url), 'utf8'), context);
+  const adapter = context.__agyNativeAdapter;
+
+  // 1. Multi-tier model via effortIndex resolves all 4 tiers + quota flags and switches smoothly
+  const picker = adapter.modelEffortPicker(triggerBtn);
+  assert.ok(picker);
+  assert.equal(picker.baseLabel, 'Gemini 4 Hydrogen');
+  assert.equal(picker.currentEffort, 'medium');
+  assert.deepEqual(
+    JSON.parse(JSON.stringify(picker.options.map(o => [o.effort, o.label, o.selected, o.quotaLow, o.quotaExhausted]))),
+    [
+      ['low', 'Low', false, false, false],
+      ['medium', 'Medium', true, true, false],
+      ['high', 'High', false, false, true],
+      ['xhigh', 'Extra', false, false, false]
+    ]
+  );
+  assert.equal(picker.select('xhigh'), true);
+  assert.equal(selectedCalls.at(-1), optXHigh);
+
+  // 2. Fallback label/id grouping works even without effortIndex
+  ctxValue.effortIndex = null;
+  ctxValue.userStatus.cascadeModelConfigData.groupedModels = {};
+  const fallbackPicker = adapter.modelEffortPicker(triggerBtn);
+  assert.ok(fallbackPicker);
+  assert.equal(fallbackPicker.options.length, 4);
+  assert.equal(fallbackPicker.options.find(o => o.effort === 'xhigh')?.label, 'Extra');
+
+  // 3. Single-tier model returns null (right-click stays no-op)
+  ctxValue.selectedModel = singleModel;
+  assert.equal(adapter.modelEffortPicker(triggerBtn), null);
+
+  // 4. Locked trigger and Best-of-N mode return null
+  ctxValue.selectedModel = optMed;
+  isLocked = true;
+  assert.equal(adapter.modelEffortPicker(triggerBtn), null);
+  isLocked = false;
+  ctxValue.bestOfNConfig = { isBestOfNEnabled: true, selectedBestOfNModels: [optMed, singleModel] };
+  assert.equal(adapter.modelEffortPicker(triggerBtn), null);
+
+  adapter.dispose();
+});
