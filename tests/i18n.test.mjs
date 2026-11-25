@@ -148,6 +148,10 @@ test('Swarm UI strings translate cleanly in zh-CN and zh-TW without middle dots 
   assert.equal(t('12 tools', 'zh-TW'), '12 個工具');
   assert.equal(t('Show more (4)', 'zh-CN'), '显示更多 (4)');
   assert.equal(t('Swarm', 'zh-CN'), 'Swarm');
+  assert.equal(t('Hook Json PreInvocation', 'zh-CN'), '调用前钩子');
+  assert.equal(t('Hook Json PreInvocation', 'zh-TW'), '調用前鉤子');
+  assert.equal(t('Hook Json SessionStart', 'zh-CN'), '会话启动钩子');
+  assert.equal(t('Hook Json SessionStart', 'zh-TW'), '會話啟動鉤子');
   assert.equal(t('Open this pane from a conversation to see its swarm. Swarms started there appear here automatically; start one with', 'zh-CN'), '请在具体会话中打开此面板以查看蜂群。该会话中启动的蜂群会自动显示在这里；输入');
   assert.equal(t('12 posts', 'zh-CN'), '12 条动态');
   assert.equal(t('4 members', 'zh-TW'), '4 名成員');

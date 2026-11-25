@@ -1721,7 +1721,7 @@ test('codexStyle drives codexProgress DOM attribute, adapter sync, worked label 
   assert.ok(p.nodes[0].textContent.includes('margin-inline-start:-.5rem;margin-inline-end:0'));
   assert.ok(p.nodes[0].textContent.includes(':not([data-testid="step-plan-chip"])'));
   assert.ok(p.nodes[0].textContent.includes('[data-testid="step-plan-chip"]{margin-left:4px!important'));
-  assert.ok(p.nodes[0].textContent.includes('[data-step-index] > :is(.relative,.w-full > .relative) > button[aria-expanded]:not([data-testid="step-plan-chip"])'));
+  assert.ok(p.nodes[0].textContent.includes(':is([data-step-index],[data-step-index] > .min-w-0) > :is(.relative,.w-full > .relative) > button[aria-expanded]:not([data-testid="step-plan-chip"])'));
   assert.equal(mainSpan.textContent, '用时 5分40秒');
   assert.equal(updSpan.textContent, '');
 
@@ -2731,6 +2731,7 @@ test('Codex UI hides disabled response toolbar during mid-turn follow-up and ren
   assert.match(css, /\[data-testid="quote-scope-pill"\],\[data-testid="side-question-quote-pill"\]/);
   assert.match(css, /\[data-testid="cascade-system-message-toolbar"\]:not\(:has\(\[data-testid="idle-status-text"\]\)\) > div:has\(button\[aria-label="Copy"\]/);
   assert.match(css, /\.animate-shimmer-text > \.shimmer-text-mask/);
+  assert.match(css, /:is\(\[data-step-index\],\[data-step-index\] > \.min-w-0\) > :is\(\.relative,\.w-full > \.relative\) > button\[aria-expanded\]/);
 
   // 2. Annotation pill mounts above editor with '1 条注释' and opens popover on click
   const quoteMount = inner.children.find(c => c.dataset?.agyPowertoolsRoot === 'composer-quotes');

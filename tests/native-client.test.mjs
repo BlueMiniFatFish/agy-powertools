@@ -2019,3 +2019,68 @@ test('modelEffortPicker resolves multi-tier models cleanly, ignores single-tier/
 
   adapter.dispose();
 });
+
+test('codexProgress keeps leading PreInvocation systemMessage ahead of stage update both during execution and after folding', () => {
+  const hookStep = { status: 3, metadata: { sourceTrajectoryStepInfo: { stepIndex: 10 } }, step: { case: 'systemMessage', value: { eventType: 'hook_json_pre_invocation', message: '<openviking-context>...' } } };
+  const leadReply = { status: 3, metadata: { sourceTrajectoryStepInfo: { stepIndex: 11 } }, step: { case: 'plannerResponse', value: { response: '先看配置再核实。' } } };
+  const cmdStepRunning = { status: 2, metadata: { sourceTrajectoryStepInfo: { stepIndex: 12 } }, step: { case: 'runCommand', value: {} } };
+  const cmdStepDone = { status: 3, metadata: { sourceTrajectoryStepInfo: { stepIndex: 12 } }, step: { case: 'runCommand', value: {} } };
+  const finalStep = { status: 3, metadata: { sourceTrajectoryStepInfo: { stepIndex: 13 } }, step: { case: 'plannerResponse', value: { response: '查清楚了。' } } };
+
+  const hookItem = { type: 'step', key: 'hook-10', step: hookStep };
+  const leadItem = { type: 'step', key: 'lead-11', step: leadReply };
+  const cmdItemRun = { type: 'step', key: 'cmd-12', step: cmdStepRunning };
+  const cmdItemDone = { type: 'step', key: 'cmd-12', step: cmdStepDone };
+  const finalItem = { type: 'lastTextResponse', key: 'final-13', step: finalStep };
+
+  const nativeSegment = arg => arg.mockResult;
+  const context = vm.createContext({
+    document: { querySelector: () => null },
+    HU: meta => meta?.sourceTrajectoryStepInfo?.stepIndex,
+    sjc: () => ({}),
+    Yyc: nativeSegment,
+    I: {},
+    tc: (_, v) => structuredClone(v),
+    Wb: (_, v) => v
+  });
+  vm.runInContext(readFileSync(new URL('../lib/native-client.js', import.meta.url), 'utf8'), context);
+  const adapter = context.__agyNativeAdapter;
+  adapter.setCodexProgress(true);
+
+  // 1. While running: native lVc put hookStep into groups[0] and leadReply in leadingSteps; hookStep stays ahead in leadingSteps
+  const runningRes = context.Yyc({
+    isRunning: true,
+    isLastTurn: true,
+    segment: { isLatest: true, steps: [hookStep, leadReply, cmdStepRunning] },
+    mockResult: {
+      leadingSteps: [leadItem],
+      tailSteps: [],
+      body: { type: 'collapsible', isActive: true, content: { groups: [hookItem, cmdItemRun] } }
+    }
+  });
+  assert.equal(runningRes.body.type, 'inline');
+  assert.equal(runningRes.leadingSteps.length, 2);
+  assert.equal(runningRes.leadingSteps[0].step, hookStep);
+  assert.equal(runningRes.leadingSteps[1].step, leadReply);
+  assert.equal(runningRes.body.content.groups.length, 1);
+  assert.equal(runningRes.body.content.groups[0].type, 'toolGroupCollapsible');
+
+  // 2. After folding: combinedGroups preserves [hookStep, leadReply, cmdDone] order
+  const doneRes = context.Yyc({
+    isRunning: false,
+    isLastTurn: true,
+    segment: { isLatest: true, steps: [hookStep, leadReply, cmdStepDone, finalStep] },
+    mockResult: {
+      leadingSteps: [leadItem],
+      tailSteps: [finalItem],
+      body: { type: 'collapsible', headerText: 'Worked for 8s', isActive: false, triggerVisible: true, defaultExpanded: false, content: { groups: [hookItem, cmdItemDone] } }
+    }
+  });
+  assert.equal(doneRes.body.type, 'collapsible');
+  assert.equal(doneRes.body.content.groups.length, 3);
+  assert.equal(doneRes.body.content.groups[0].step, hookStep);
+  assert.equal(doneRes.body.content.groups[1].step, leadReply);
+  assert.equal(doneRes.body.content.groups[2].type, 'toolGroupCollapsible');
+
+  adapter.dispose();
+});
