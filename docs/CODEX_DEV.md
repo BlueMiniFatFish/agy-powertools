@@ -7,7 +7,7 @@
 ## 1. 仓库与分支约定及同步流程
 
 - `upstream`：`https://github.com/WhiteBr1ck/agy-powertools.git`（上游原仓库）
-- `origin`：`https://github.com/xiejunjie168-bot/agy-powertools.git`（自有定制版对外发布仓库，当前发行版 `v1.1.0`，集成上游 `v2.16.1`）
+- `origin`：`https://github.com/xiejunjie168-bot/agy-powertools.git`（自有定制版对外发布仓库，当前发行版 `v1.1.0`，集成上游 `v2.16.3`）
 - `main` / `feat/codex-style`：默认主分支与开发分支均同步包含 Codex 定制版改动，`project.json` 已切换至 `origin` 发布源
 
 ```bash
@@ -36,6 +36,11 @@ npm run install:local
 | 大尺寸贴图预览与快捷剔除热区 | ✅ 已完成 | `codexStyle`（内部 `setCodexComposerMedia`） | Codex 增强扩展 | `lib/native-ui.js`、`lib/native-client.js`、`tests/native-ui.test.mjs`、`tests/native-client.test.mjs` |
 | 高清原图上传（`≤ 3 MiB`） | ✅ 已完成 | `hdImages` | Codex 增强扩展 | `lib/native-bindings.js`、`lib/native-client.js`、`lib/native-panels.js`、`lib/settings.mjs`、`tests/native-client.test.mjs` |
 | 遗漏汉化与全场景横向右键胶囊 | ✅ 已完成 | `codexStyle`、`fileContextMenu` | Codex 增强扩展 / 会话增强 | `lib/native-client.js`、`lib/native-ui.js`、`lib/native-i18n.js`、`lib/zh-tw.mjs`、`tests/native-client.test.mjs`、`tests/i18n.test.mjs` |
+| 左侧栏 Codex 换肤（保留原生结构） | ✅ 已完成 | `codexStyle` | Codex 增强扩展 | `lib/codex-style.mjs`、`lib/native-ui.js`、`tests/native-ui.test.mjs` |
+| 输入框顶部注释胶囊与已发引用胶囊 | ✅ 已完成 | `codexStyle` | Codex 增强扩展 | `lib/native-client.js`、`lib/native-ui.js`、`tests/native-client.test.mjs`、`tests/native-ui.test.mjs` |
+| 模型选择器右键切换思考深度 | ✅ 已完成 | `codexStyle`（`modelEffortPicker`） | Codex 增强扩展 | `lib/native-client.js`、`lib/native-ui.js`、`tests/native-client.test.mjs`、`tests/native-ui.test.mjs` |
+| 已完成工作收拢、代码块/操作栏与钩子行对齐 | ✅ 已完成 | `codexStyle` | Codex 增强扩展 | `lib/native-client.js`、`lib/native-ui.js`、`lib/native-i18n.js`、`lib/zh-tw.mjs` |
+| 上游 `v2.16.2 - v2.16.3` 更新检测与合并 | ✅ 已完成 | `autoCheckUpdates`、`autoInstallUpdates` | 关于 | `lib/updates.mjs`、`lib/native-panels.js`、`lib/native-ui.js`、`lib/native-client.js`、`lib/settings.mjs`、`tests/updates.test.mjs` |
 
 ---
 

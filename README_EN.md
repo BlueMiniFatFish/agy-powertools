@@ -6,7 +6,7 @@
   <!-- plugin-badges:start -->
   <p>
     <a href="https://github.com/xiejunjie168-bot/agy-powertools/releases"><img src="https://img.shields.io/github/v/release/xiejunjie168-bot/agy-powertools?label=Release&color=2563eb" height="20" alt="Release" /></a>
-    <a href="https://github.com/WhiteBr1ck/agy-powertools/releases/tag/v2.16.1"><img src="https://img.shields.io/badge/Upstream-v2.16.1-64748b" height="20" alt="Upstream v2.16.1" /></a>
+    <a href="https://github.com/WhiteBr1ck/agy-powertools/releases/tag/v2.16.3"><img src="https://img.shields.io/badge/Upstream-v2.16.3-64748b" height="20" alt="Upstream v2.16.3" /></a>
     <a href="https://github.com/xiejunjie168-bot/agy-powertools/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/xiejunjie168-bot/agy-powertools/ci.yml?label=CI" height="20" alt="CI" /></a>
     <a href="LICENSE"><img src="https://img.shields.io/github/license/xiejunjie168-bot/agy-powertools?label=License&color=16a34a" height="20" alt="MIT License" /></a>
     <img src="https://img.shields.io/badge/Antigravity-2.35%2B-0f172a" height="20" alt="Antigravity 2.35+" />
@@ -225,13 +225,14 @@ Every setting applies live in **Powertools -> Settings** and saves automatically
 
 ## Changelog
 
-### v1.1.0 (Synced with upstream v2.16.0 - v2.16.1)
-- **Guaranteed Codex override & smooth fallback**:
-  - Integrates all updates from [`WhiteBr1ck/agy-powertools`](https://github.com/WhiteBr1ck/agy-powertools) `v2.16.0` through `v2.16.1` while guaranteeing that Codex typography, live progress streaming, horizontal quote/attach pills, and HD image uploads override upstream rules; turning off Codex Style cleanly falls back to upstream's new chat image context menu (attach, copy, save).
-- **Upstream `v2.16.0` - `v2.16.1` highlights integrated**:
-  - Adds the Overview 3D `ThinkingOrb` particle sphere, theme-adaptive delegated tooltips, and standard vs. API promo pricing-basis toggle.
-  - Adds final-answer-only Copy extraction, instant `/compact` checkpoint ring estimation, and automatic non-TUN proxy cold-start relaunch with a Sidecar fallback action.
-  - Adds multi-account model-compatibility guards and interactive auto-switch countdown banners, fixes SSH host overview filtering and batched subagent telemetry, and slims release bundles by excluding README screenshots.
+### v1.1.0 (Synced with upstream v2.16.0 - v2.16.3)
+- **Deeper Codex desktop experience & guaranteed override**:
+  - Integrates all updates from [`WhiteBr1ck/agy-powertools`](https://github.com/WhiteBr1ck/agy-powertools) `v2.16.0` through `v2.16.3` while guaranteeing that Codex typography, live progress streaming, horizontal quote/attach pills, and HD image uploads override upstream rules; turning off Codex Style cleanly falls back to upstream's new chat image context menu (attach, copy, save).
+  - Restyles the left sidebar with Codex proportions and dark palette (#202020 canvas, 14px scale, #323232 borderless active pill while keeping native pinned chats and project folders), converts editor/selection quotes into compact composer-top pills and sent pill badges, adds right-click thinking effort switching on the model selector, auto-collapses finished work steps without mid-stream flicker, and refines code cards, hover action bars, shimmer timing, and hook rows.
+- **Upstream `v2.16.0` - `v2.16.3` highlights integrated**:
+  - Adds automatic update checking, in-app notifications, and optional same-major idle auto-install (#45) with a 12-hour TTL, immediate check after client upgrades, clickable sidebar badge, titlebar status dot, and bottom-right reminder card.
+  - Adds the Overview 3D `ThinkingOrb` particle sphere, theme-adaptive delegated tooltips, standard vs. API promo pricing-basis toggle, final-answer-only Copy extraction, instant `/compact` checkpoint ring estimation, and chat inline image context actions.
+  - Resolves long-chat stutter with O(1) turn caching and scroll deferral (#51), fixes post-restart initial turn inline edit (#58), completes Antigravity 2.35.1 Skills/Customizations/MCP i18n with diff exclusions (#55/#60), exposes copyable OAuth URLs (#56), syncs ToS state across account switches (#59), isolates SSH remote windows from local accounts (#49/#57), and switches Windows cold-start proxy relaunch to zero-AMSI temporary `.lnk` shortcuts (#53).
 
 ### v1.0.0 (Initial Release, synced with upstream v2.15.5)
 - **Independent Codex Edition release (integrating all features from [`WhiteBr1ck/agy-powertools`](https://github.com/WhiteBr1ck/agy-powertools) `v2.15.5`)**:
