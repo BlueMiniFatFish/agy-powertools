@@ -1332,6 +1332,10 @@ test('codexStyle defaults inject ordered CSS rules, apply DOM attrs/vars, respec
   assert.ok(css.includes('text-decoration:underline dashed .5px currentColor!important'));
   assert.ok(css.includes('html[data-agy-codex-style][data-agy-codex-theme]:not([data-agy-user-bubble]) [data-testid="user-input-step"] [data-testid="user-message-bubble"]'));
   assert.ok(css.includes(':is(html.dark[data-agy-codex-style][data-agy-codex-theme]:not([data-agy-user-bubble]),html[data-agy-codex-style][data-agy-codex-theme]:not([data-agy-user-bubble]) .dark)'));
+  assert.ok(css.includes('--sidebar:color-mix(in srgb,var(--agy-codex-light-surface,#FFFFFF) 97%,var(--agy-codex-light-ink,#1A1C1F))'));
+  assert.ok(css.includes('--sidebar:color-mix(in srgb,var(--agy-codex-dark-card,#212121) 88%,var(--agy-codex-dark-surface,#181818));--shell-canvas:var(--sidebar);--shell:var(--sidebar);--sidebar-secondary:color-mix(in srgb,var(--agy-codex-dark-ink,#FFFFFF) 8%,var(--sidebar));--sidebar-muted:color-mix(in srgb,var(--agy-codex-dark-ink,#FFFFFF) 5.5%,var(--sidebar))'));
+  assert.ok(css.includes('html[data-agy-codex-style] [data-testid="new-conversation-button"].agy-sidebar-raised{background-color:transparent!important'));
+  assert.ok(css.includes('html[data-agy-codex-style] .bg-sidebar .agy-sidebar-row:is(.bg-background.ring-1,.ring-border,[aria-current="page"],:has(a[aria-current="page"])){background-color:var(--sidebar-secondary)!important;--row-bg:var(--sidebar-secondary)!important;box-shadow:none!important;--tw-ring-shadow:0 0 #0000!important'));
   assert.equal(css.includes('html[data-agy-codex-style][data-agy-codex-code-font-size] [data-testid="agent-response"] [data-markdown-root] code:not(pre *)'), false);
 
   // Turn off codexStyle -> removes all codex attrs/vars while preserving data-agy-compact
