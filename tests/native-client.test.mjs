@@ -1710,12 +1710,13 @@ test('extractQuotableSelection and attachSelectionToComposer quote main and Side
   assert.equal(clearedSelections.length, 2);
 });
 
-test('codexProgress folds completed work immediately when final response starts streaming and unfolds back if another tool starts', () => {
+test('codexProgress keeps streaming stage commentary unfolded and folds once a plain-text reply completes without tool calls', () => {
   const toolDone = { type: 'step', key: 'cmd-1', step: { status: 3, metadata: { createdAt: { seconds: 100 }, completedAt: { seconds: 112 } }, step: { case: 'runCommand', value: {} } } };
   const toolRunning = { type: 'step', key: 'cmd-2', step: { status: 2, step: { case: 'runCommand', value: {} } } };
   const thinkingOnly = { type: 'step', key: 'think-1', step: { status: 2, step: { case: 'plannerResponse', value: { thought: 'thinking...', response: '' } } } };
-  const streamingReply = { type: 'lastTextResponse', key: 'reply-1', step: { status: 2, step: { case: 'plannerResponse', value: { response: '这是正在流式输出的最终正文。', toolCalls: [] } } } };
-  const inlineReplyStep = { type: 'step', key: 'reply-inline', step: streamingReply.step };
+  const streamingReply = { type: 'lastTextResponse', key: 'reply-1', step: { status: 2, step: { case: 'plannerResponse', value: { response: '先说明一下这一阶段的排查计划。', toolCalls: [] } } } };
+  const completedReply = { type: 'lastTextResponse', key: 'reply-done', step: { status: 3, metadata: { createdAt: { seconds: 112 }, completedAt: { seconds: 115 } }, step: { case: 'plannerResponse', value: { response: '全部核对完成。', toolCalls: [] } } } };
+  const inlineCompletedStep = { type: 'step', key: 'reply-inline', step: completedReply.step };
 
   const nativeSegment = arg => arg.mockResult;
   const context = vm.createContext({
@@ -1743,7 +1744,7 @@ test('codexProgress folds completed work immediately when final response starts 
   });
   assert.equal(toolRunRes.body.type, 'inline');
 
-  // 2. Thinking-only plannerResponse with empty response must NOT fold early
+  // 2. Thinking-only plannerResponse with empty response stays inline
   const thinkingRes = context.Yyc({
     isRunning: true,
     isLastTurn: true,
@@ -1756,8 +1757,8 @@ test('codexProgress folds completed work immediately when final response starts 
   });
   assert.equal(thinkingRes.body.type, 'inline');
 
-  // 3. Completed tool + streaming plain-text final reply folds work immediately while streaming reply
-  const earlyFoldCollapsible = context.Yyc({
+  // 3. Running (status=2) plannerResponse text without toolCalls yet MUST stay inline to prevent fold/unfold flicker on stage updates
+  const streamingStayOpen = context.Yyc({
     isRunning: true,
     isLastTurn: true,
     segment: { isLatest: true, steps: [toolDone.step, streamingReply.step] },
@@ -1767,39 +1768,52 @@ test('codexProgress folds completed work immediately when final response starts 
       body: { type: 'collapsible', headerText: 'Worked for 12s', isActive: true, triggerVisible: false, defaultExpanded: true, content: { groups: [toolDone] } }
     }
   });
-  assert.equal(earlyFoldCollapsible.body.type, 'collapsible');
-  assert.equal(earlyFoldCollapsible.body.defaultExpanded, false);
-  assert.equal(earlyFoldCollapsible.body.isActive, false);
-  assert.equal(earlyFoldCollapsible.body.triggerVisible, true);
-  assert.equal(earlyFoldCollapsible.body.headerText, 'Worked for 12s');
-  assert.equal(earlyFoldCollapsible.tailSteps[0].step.step.value.response, '这是正在流式输出的最终正文。');
+  assert.equal(streamingStayOpen.body.type, 'inline');
 
-  // 4. Inline segment shape without native collapsible also folds prefix work and preserves streaming final reply
-  const earlyFoldInline = context.Yyc({
+  // 4. Once final plain-text plannerResponse completes (status=3, no toolCalls), fold work even if post-invocation isRunning is still true
+  const doneFoldCollapsible = context.Yyc({
     isRunning: true,
     isLastTurn: true,
-    segment: { isLatest: true, steps: [toolDone.step, inlineReplyStep.step] },
+    segment: { isLatest: true, steps: [toolDone.step, completedReply.step] },
+    mockResult: {
+      leadingSteps: [],
+      tailSteps: [completedReply],
+      body: { type: 'collapsible', headerText: 'Worked for 12s', isActive: true, triggerVisible: false, defaultExpanded: true, content: { groups: [toolDone] } }
+    }
+  });
+  assert.equal(doneFoldCollapsible.body.type, 'collapsible');
+  assert.equal(doneFoldCollapsible.body.defaultExpanded, false);
+  assert.equal(doneFoldCollapsible.body.isActive, false);
+  assert.equal(doneFoldCollapsible.body.triggerVisible, true);
+  assert.equal(doneFoldCollapsible.body.headerText, 'Worked for 12s');
+  assert.equal(doneFoldCollapsible.tailSteps[0].step.step.value.response, '全部核对完成。');
+
+  // 5. Inline segment shape without native collapsible also folds prefix work once trailing plain-text reply finishes
+  const doneFoldInline = context.Yyc({
+    isRunning: true,
+    isLastTurn: true,
+    segment: { isLatest: true, steps: [toolDone.step, inlineCompletedStep.step] },
     mockResult: {
       leadingSteps: [],
       tailSteps: [],
-      body: { type: 'inline', content: { groups: [toolDone, inlineReplyStep] } }
+      body: { type: 'inline', content: { groups: [toolDone, inlineCompletedStep] } }
     }
   });
-  assert.equal(earlyFoldInline.body.type, 'collapsible');
-  assert.equal(earlyFoldInline.body.defaultExpanded, false);
-  assert.equal(earlyFoldInline.body.headerText, 'Worked for 12s');
-  assert.equal(earlyFoldInline.tailSteps[0].type, 'lastTextResponse');
-  assert.equal(earlyFoldInline.tailSteps[0].step, inlineReplyStep.step);
+  assert.equal(doneFoldInline.body.type, 'collapsible');
+  assert.equal(doneFoldInline.body.defaultExpanded, false);
+  assert.equal(doneFoldInline.body.headerText, 'Worked for 15s');
+  assert.equal(doneFoldInline.tailSteps[0].type, 'lastTextResponse');
+  assert.equal(doneFoldInline.tailSteps[0].step, inlineCompletedStep.step);
 
-  // 5. If a new running tool starts mid-turn, dynamically unfold back to inline
+  // 6. If a new running tool starts later in the same turn, keep unfolded (inline)
   const reUnfolded = context.Yyc({
     isRunning: true,
     isLastTurn: true,
-    segment: { isLatest: true, steps: [toolDone.step, streamingReply.step, toolRunning.step] },
+    segment: { isLatest: true, steps: [toolDone.step, inlineCompletedStep.step, toolRunning.step] },
     mockResult: {
       leadingSteps: [],
       tailSteps: [toolRunning],
-      body: { type: 'collapsible', isActive: true, content: { groups: [toolDone, inlineReplyStep] } }
+      body: { type: 'collapsible', isActive: true, content: { groups: [toolDone, inlineCompletedStep] } }
     }
   });
   assert.equal(reUnfolded.body.type, 'inline');
