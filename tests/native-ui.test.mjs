@@ -2525,3 +2525,261 @@ test('auto-switch waits for background running tabs and interactive banner suppo
 
   ctx.__agyPowertools.dispose();
 });
+
+test('Codex UI hides disabled response toolbar during mid-turn follow-up and renders composer annotation pill cleanly', async () => {
+  const source = readFileSync(new URL('../lib/native-ui.js', import.meta.url), 'utf8');
+  const docListeners = new Map();
+  const styles = [];
+  let onQuotesChangeCb = null;
+  let quotes = [{ id: 'q-1', text: '第一段引用文本', isCodeBlock: false }];
+  const flushCalls = [];
+  const removedIds = [];
+  let clearCount = 0;
+
+  const makeEl = (tag = 'div') => {
+    const el = {
+      tagName: tag.toUpperCase(),
+      dataset: {},
+      style: {},
+      className: '',
+      isConnected: true,
+      children: [],
+      parentElement: null,
+      attributes: new Map(),
+      classList: {
+        contains: cls => String(el.className || '').split(/\s+/).includes(cls)
+      },
+      get firstChild() { return el.children[0] || null; },
+      get firstElementChild() { return el.children[0] || null; },
+      get nextSibling() {
+        if (!el.parentElement) return null;
+        const idx = el.parentElement.children.indexOf(el);
+        return idx >= 0 ? el.parentElement.children[idx + 1] || null : null;
+      },
+      append(...nodes) {
+        for (const n of nodes) {
+          if (!n || typeof n === 'string') continue;
+          n.parentElement = el;
+          n.isConnected = true;
+          el.children.push(n);
+        }
+      },
+      appendChild(n) { el.append(n); return n; },
+      insertBefore(n, before) {
+        if (n.parentElement) {
+          const oldIdx = n.parentElement.children.indexOf(n);
+          if (oldIdx >= 0) n.parentElement.children.splice(oldIdx, 1);
+        }
+        n.parentElement = el;
+        n.isConnected = true;
+        const idx = before ? el.children.indexOf(before) : -1;
+        if (idx >= 0) el.children.splice(idx, 0, n);
+        else el.children.push(n);
+        return n;
+      },
+      remove() {
+        if (el.parentElement) {
+          const idx = el.parentElement.children.indexOf(el);
+          if (idx >= 0) el.parentElement.children.splice(idx, 1);
+          el.parentElement = null;
+        }
+        el.isConnected = false;
+      },
+      setAttribute(k, v) { el.attributes.set(k, String(v)); },
+      getAttribute(k) { return el.attributes.has(k) ? el.attributes.get(k) : (k === 'data-agy-powertools-root' ? el.dataset.agyPowertoolsRoot || null : null); },
+      removeAttribute(k) { el.attributes.delete(k); },
+      hasAttribute(k) { return el.attributes.has(k); },
+      toggleAttribute(k, f) { const on = f == null ? !el.hasAttribute(k) : Boolean(f); if (on) el.setAttribute(k, ''); else el.removeAttribute(k); return on; },
+      matches(sel) {
+        return sel.split(',').some(part => {
+          const s = part.trim();
+          if (s === '.surface-composer-card') return el.classList.contains('surface-composer-card');
+          if (s === '[contenteditable="true"]') return el.getAttribute('contenteditable') === 'true';
+          if (s === '[data-testid="send-button"]') return el.dataset.testid === 'send-button';
+          if (s === '[data-testid="input-attachment"]') return el.dataset.testid === 'input-attachment';
+          if (s === '.relative.w-full') return el.classList.contains('relative') && el.classList.contains('w-full');
+          return false;
+        });
+      },
+      closest(sel) {
+        for (let cur = el; cur; cur = cur.parentElement) if (cur.matches?.(sel)) return cur;
+        return null;
+      },
+      querySelectorAll(sel) {
+        const out = [];
+        const visit = n => {
+          for (const c of n.children || []) {
+            if (c.matches?.(sel)) out.push(c);
+            visit(c);
+          }
+        };
+        visit(el);
+        return out;
+      },
+      querySelector(sel) { return el.querySelectorAll(sel)[0] || null; }
+    };
+    return el;
+  };
+
+  const head = makeEl('head');
+  const body = makeEl('body');
+  const docEl = makeEl('html');
+  docEl.style = { setProperty() {}, removeProperty() {} };
+
+  const card = makeEl('div'); card.className = 'surface-composer-card';
+  const inner = makeEl('div'); inner.className = 'relative w-full';
+  const editorWrap = makeEl('div');
+  const editable = makeEl('div'); editable.setAttribute('contenteditable', 'true');
+  const sendBtn = makeEl('button'); sendBtn.dataset.testid = 'send-button'; sendBtn.disabled = true; sendBtn.setAttribute('disabled', '');
+  editorWrap.append(editable, sendBtn);
+  inner.append(editorWrap);
+  card.append(inner);
+  body.append(card);
+
+  const renderedRoots = new Map();
+  let curState = false;
+  const expandVnode = node => {
+    if (!node || typeof node !== 'object') return node;
+    if (typeof node.type === 'function') return expandVnode(node.type({ ...(node.props || {}), children: node.children }));
+    return { ...node, children: (node.children || []).map(expandVnode) };
+  };
+  const findTestId = (node, id) => {
+    if (!node || typeof node !== 'object') return null;
+    if (node.props?.['data-testid'] === id) return node;
+    for (const c of Array.isArray(node.children) ? node.children : [node.children]) {
+      const hit = findTestId(c, id);
+      if (hit) return hit;
+    }
+    return null;
+  };
+
+  const doc = {
+    readyState: 'complete',
+    head,
+    body,
+    documentElement: docEl,
+    createElement(tag) {
+      const n = makeEl(tag);
+      if (tag === 'style') styles.push(n);
+      return n;
+    },
+    addEventListener(type, fn) { if (!docListeners.has(type)) docListeners.set(type, []); docListeners.get(type).push(fn); },
+    removeEventListener() {},
+    querySelectorAll: sel => body.querySelectorAll(sel),
+    querySelector: sel => body.querySelector(sel)
+  };
+
+  const ctx = vm.createContext({
+    document: doc,
+    window: { addEventListener() {}, removeEventListener() {}, innerWidth: 1280 },
+    navigator: {},
+    location: { pathname: '/' },
+    AbortController,
+    React: {
+      Fragment: Symbol('Fragment'),
+      createElement: (type, props, ...children) => ({ type, props: props || {}, children: children.flat() }),
+      useState: init => [curState, val => { curState = typeof val === 'function' ? val(curState) : val; }],
+      useRef: init => ({ current: init }),
+      useEffect: () => {}
+    },
+    ReactDOM: {
+      createRoot: mount => {
+        const rec = {
+          mount,
+          vnode: null,
+          render(tree) { rec.vnode = tree; },
+          unmount() { rec.vnode = null; }
+        };
+        renderedRoots.set(mount, rec);
+        return rec;
+      }
+    },
+    HC: () => null,
+    __agyNativeAdapter: {
+      wrap: el => el,
+      executionState: () => null,
+      capabilities: () => ({}),
+      getComposerQuotes: target => target === card ? [...quotes] : [],
+      removeComposerQuote: (_target, id) => { removedIds.push(id); quotes = quotes.filter(q => q.id !== id); onQuotesChangeCb?.(); return true; },
+      clearComposerQuotes: () => { clearCount++; quotes = []; onQuotesChangeCb?.(); return true; },
+      flushComposerQuotesToEditor: target => { flushCalls.push(target); quotes = []; onQuotesChangeCb?.(); return 1; },
+      onComposerQuotesChange: fn => { onQuotesChangeCb = fn; return () => { onQuotesChangeCb = null; }; },
+      setEnabled() {}, setStageUpdates() {}, setCodexProgress() {}, setCodexComposerMedia() {}, setUiLanguage() {}, setHdImages() {}, setEfficientIO() {}, setContextLimit() {}, setSidebarProjectLimit() {},
+      dispose() {}
+    },
+    __agyPowertoolsHost: raw => {
+      const msg = JSON.parse(raw);
+      if (msg.method === 'settings.get') ctx.__agyPowertoolsReceive(msg.id, { enabled: true, codexStyle: true });
+      else ctx.__agyPowertoolsReceive(msg.id, {});
+    },
+    MutationObserver: class { observe() {} disconnect() {} },
+    setInterval: () => 1,
+    clearInterval: () => {},
+    setTimeout: fn => { if (typeof fn === 'function') fn(); return 1; },
+    clearTimeout: () => {}
+  });
+  vm.runInContext(source, ctx);
+  await new Promise(r => setImmediate(r));
+  await new Promise(r => setImmediate(r));
+
+  // 1. Density style hides disabled response toolbar during mid-turn follow-up & removes composer media bottom border
+  const css = styles.map(s => s.textContent || '').join('\n');
+  assert.match(css, /fieldset\[disabled\]:has\(\[data-testid="cascade-system-message-toolbar"\]\)\{display:none!important\}/);
+  assert.match(css, /border-bottom:0!important/);
+  assert.match(css, /\[data-agy-powertools-root="composer-quotes"\]\{order:10/);
+
+  // 2. Annotation pill mounts above editor with '1 条注释' and opens popover on click
+  const quoteMount = inner.children.find(c => c.dataset?.agyPowertoolsRoot === 'composer-quotes');
+  assert.ok(quoteMount);
+  assert.equal(card.getAttribute('data-agy-has-quotes'), '1');
+  let tree = expandVnode(renderedRoots.get(quoteMount).vnode);
+  const pillBtn = findTestId(tree, 'agy-composer-annotations-pill');
+  assert.ok(pillBtn);
+  assert.match(JSON.stringify(pillBtn), /1 条注释/);
+  pillBtn.props.onClick({ preventDefault() {}, stopPropagation() {} });
+  tree = expandVnode(renderedRoots.get(quoteMount).vnode);
+  assert.ok(findTestId(tree, 'agy-composer-annotations-popover'));
+
+  // 3. Adding image attachment reparents annotation pill inside mediaRow (order: 10 keeps images on the left)
+  const mediaRow = makeEl('div');
+  const att = makeEl('div'); att.dataset.testid = 'input-attachment';
+  mediaRow.append(att);
+  inner.insertBefore(mediaRow, editorWrap);
+  quotes = [
+    { id: 'q-1', text: '第一段引用文本', isCodeBlock: false },
+    { id: 'q-2', text: 'const y = 2;', isCodeBlock: true }
+  ];
+  onQuotesChangeCb();
+  assert.equal(quoteMount.parentElement, mediaRow);
+  tree = expandVnode(renderedRoots.get(quoteMount).vnode);
+  assert.match(JSON.stringify(findTestId(tree, 'agy-composer-annotations-pill')), /2 条注释/);
+
+  // 4. Removing item and clearing work
+  findTestId(tree, 'agy-composer-annotation-remove').props.onClick({ preventDefault() {}, stopPropagation() {} });
+  assert.deepEqual(removedIds, ['q-1']);
+  assert.equal(quotes.length, 1);
+
+  // 5. Pressing Enter on contenteditable or clicking Send flushes remaining quote and unlocks disabled button
+  for (const fn of docListeners.get('keydown') || []) {
+    fn({ key: 'Enter', shiftKey: false, altKey: false, ctrlKey: false, metaKey: false, isComposing: false, target: editable });
+  }
+  assert.equal(flushCalls.length, 1);
+  assert.equal(flushCalls[0], card);
+
+  quotes = [{ id: 'q-3', text: '发送前待插入', isCodeBlock: false }];
+  onQuotesChangeCb();
+  for (const fn of docListeners.get('pointerdown') || []) {
+    fn({ type: 'pointerdown', button: 0, target: sendBtn });
+  }
+  assert.equal(flushCalls.length, 2);
+  assert.equal(sendBtn.disabled, false);
+
+  // Clean clear works too
+  quotes = [{ id: 'q-4', text: '待清空', isCodeBlock: false }];
+  onQuotesChangeCb();
+  tree = expandVnode(renderedRoots.get(quoteMount).vnode);
+  findTestId(tree, 'agy-composer-annotations-clear').props.onClick({ preventDefault() {}, stopPropagation() {} });
+  assert.equal(clearCount, 1);
+
+  ctx.__agyPowertools.dispose();
+});

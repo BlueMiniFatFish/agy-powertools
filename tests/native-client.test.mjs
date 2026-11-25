@@ -1709,3 +1709,225 @@ test('extractQuotableSelection and attachSelectionToComposer quote main and Side
   ]);
   assert.equal(clearedSelections.length, 2);
 });
+
+test('codexProgress folds completed work immediately when final response starts streaming and unfolds back if another tool starts', () => {
+  const toolDone = { type: 'step', key: 'cmd-1', step: { status: 3, metadata: { createdAt: { seconds: 100 }, completedAt: { seconds: 112 } }, step: { case: 'runCommand', value: {} } } };
+  const toolRunning = { type: 'step', key: 'cmd-2', step: { status: 2, step: { case: 'runCommand', value: {} } } };
+  const thinkingOnly = { type: 'step', key: 'think-1', step: { status: 2, step: { case: 'plannerResponse', value: { thought: 'thinking...', response: '' } } } };
+  const streamingReply = { type: 'lastTextResponse', key: 'reply-1', step: { status: 2, step: { case: 'plannerResponse', value: { response: '这是正在流式输出的最终正文。', toolCalls: [] } } } };
+  const inlineReplyStep = { type: 'step', key: 'reply-inline', step: streamingReply.step };
+
+  const nativeSegment = arg => arg.mockResult;
+  const context = vm.createContext({
+    document: { querySelector: () => null },
+    sjc: () => ({}),
+    Yyc: nativeSegment,
+    I: {},
+    tc: (_, v) => structuredClone(v),
+    Wb: (_, v) => v
+  });
+  vm.runInContext(readFileSync(new URL('../lib/native-client.js', import.meta.url), 'utf8'), context);
+  const adapter = context.__agyNativeAdapter;
+  adapter.setCodexProgress(true);
+
+  // 1. Running tool step stays unfolded (inline)
+  const toolRunRes = context.Yyc({
+    isRunning: true,
+    isLastTurn: true,
+    segment: { isLatest: true, steps: [toolRunning.step] },
+    mockResult: {
+      leadingSteps: [],
+      tailSteps: [],
+      body: { type: 'collapsible', isActive: true, triggerVisible: false, defaultExpanded: true, content: { groups: [toolRunning] } }
+    }
+  });
+  assert.equal(toolRunRes.body.type, 'inline');
+
+  // 2. Thinking-only plannerResponse with empty response must NOT fold early
+  const thinkingRes = context.Yyc({
+    isRunning: true,
+    isLastTurn: true,
+    segment: { isLatest: true, steps: [toolDone.step, thinkingOnly.step] },
+    mockResult: {
+      leadingSteps: [],
+      tailSteps: [thinkingOnly],
+      body: { type: 'collapsible', isActive: true, triggerVisible: false, defaultExpanded: true, content: { groups: [toolDone] } }
+    }
+  });
+  assert.equal(thinkingRes.body.type, 'inline');
+
+  // 3. Completed tool + streaming plain-text final reply folds work immediately while streaming reply
+  const earlyFoldCollapsible = context.Yyc({
+    isRunning: true,
+    isLastTurn: true,
+    segment: { isLatest: true, steps: [toolDone.step, streamingReply.step] },
+    mockResult: {
+      leadingSteps: [],
+      tailSteps: [streamingReply],
+      body: { type: 'collapsible', headerText: 'Worked for 12s', isActive: true, triggerVisible: false, defaultExpanded: true, content: { groups: [toolDone] } }
+    }
+  });
+  assert.equal(earlyFoldCollapsible.body.type, 'collapsible');
+  assert.equal(earlyFoldCollapsible.body.defaultExpanded, false);
+  assert.equal(earlyFoldCollapsible.body.isActive, false);
+  assert.equal(earlyFoldCollapsible.body.triggerVisible, true);
+  assert.equal(earlyFoldCollapsible.body.headerText, 'Worked for 12s');
+  assert.equal(earlyFoldCollapsible.tailSteps[0].step.step.value.response, '这是正在流式输出的最终正文。');
+
+  // 4. Inline segment shape without native collapsible also folds prefix work and preserves streaming final reply
+  const earlyFoldInline = context.Yyc({
+    isRunning: true,
+    isLastTurn: true,
+    segment: { isLatest: true, steps: [toolDone.step, inlineReplyStep.step] },
+    mockResult: {
+      leadingSteps: [],
+      tailSteps: [],
+      body: { type: 'inline', content: { groups: [toolDone, inlineReplyStep] } }
+    }
+  });
+  assert.equal(earlyFoldInline.body.type, 'collapsible');
+  assert.equal(earlyFoldInline.body.defaultExpanded, false);
+  assert.equal(earlyFoldInline.body.headerText, 'Worked for 12s');
+  assert.equal(earlyFoldInline.tailSteps[0].type, 'lastTextResponse');
+  assert.equal(earlyFoldInline.tailSteps[0].step, inlineReplyStep.step);
+
+  // 5. If a new running tool starts mid-turn, dynamically unfold back to inline
+  const reUnfolded = context.Yyc({
+    isRunning: true,
+    isLastTurn: true,
+    segment: { isLatest: true, steps: [toolDone.step, streamingReply.step, toolRunning.step] },
+    mockResult: {
+      leadingSteps: [],
+      tailSteps: [toolRunning],
+      body: { type: 'collapsible', isActive: true, content: { groups: [toolDone, inlineReplyStep] } }
+    }
+  });
+  assert.equal(reUnfolded.body.type, 'inline');
+  adapter.dispose();
+});
+
+test('codexComposerMedia intercepts quotes into annotation store, keeps @file passthrough, prepends on flush/send, and restores cleanly', async () => {
+  const nativeInserted = [];
+  const sentPayloads = [];
+  const changeEvents = [];
+  let editorJson = {
+    root: {
+      type: 'root',
+      children: [{ type: 'paragraph', children: [{ type: 'text', text: '那这个呢？' }] }]
+    }
+  };
+  const editor = {
+    focused: false,
+    focus() { this.focused = true; },
+    getRootElement: () => null,
+    getEditorState: () => ({ toJSON: () => structuredClone(editorJson) }),
+    setEditorState: next => {
+      editorJson = typeof next === 'string' ? JSON.parse(next) : next;
+    }
+  };
+  const originalGy = (ed, item) => {
+    nativeInserted.push({ ed, item });
+    const textLabel = item?.scopeItem?.value?.content || 'mention';
+    editorJson = {
+      root: {
+        ...editorJson.root,
+        children: [...editorJson.root.children, { type: 'paragraph', children: [{ type: 'quote-node', content: textLabel }] }]
+      }
+    };
+  };
+  const box = { getInputCardElement: () => ({ scrollIntoView() {} }) };
+  const inputBoxEl = {
+    '__reactFiber$box': { tag: 10, memoizedProps: { value: { inputBoxRef: { current: box }, getLexicalEditor: () => editor } }, return: null }
+  };
+  const msgView = {
+    getAttribute: k => k === 'data-cascade-id' ? 'conv-pill-1' : null,
+    querySelector: () => inputBoxEl
+  };
+  const svcAnchor = {
+    '__reactFiber$svc': {
+      tag: 10,
+      memoizedProps: {
+        value: {
+          forkConversation: async () => ({}),
+          sendUserCascadeMessage: async payload => { sentPayloads.push(payload); }
+        }
+      },
+      return: null
+    }
+  };
+  const context = vm.createContext({
+    document: {
+      dispatchEvent() {},
+      querySelector: sel => {
+        if (sel.includes('conversation-view')) return msgView;
+        if (sel.includes('customizations') || sel.includes('Message input')) return svcAnchor;
+        return null;
+      }
+    },
+    CG: { ContextScopeItemSchema: { name: 'ContextScope' }, TextOrScopeItemSchema: { name: 'TextOrScope' } },
+    I: { CascadeConfigSchema: { name: 'CascadeConfig' } },
+    tc: (_, v) => structuredClone(v),
+    Wb: (_schema, v) => v,
+    IJ: (_ed, str) => JSON.parse(str),
+    LN: items => JSON.stringify({ root: { type: 'root', children: items.length ? [{ type: 'paragraph', children: items }] : [] } }),
+    Gy: originalGy
+  });
+  vm.runInContext(readFileSync(new URL('../lib/native-client.js', import.meta.url), 'utf8'), context);
+  const adapter = context.__agyNativeAdapter;
+  const unsub = adapter.onComposerQuotesChange(() => changeEvents.push(true));
+
+  adapter.setCodexComposerMedia(true);
+  assert.notEqual(context.Gy, originalGy);
+
+  // 1. Direct Gy quote call and attachSelectionToComposer are intercepted instead of inserted into editor immediately
+  const res = await adapter.attachSelectionToComposer({ text: '第一条引用内容', source: msgView, root: msgView, isCodeBlock: false }, { target: 'main' });
+  assert.equal(res.pill, true);
+  context.Gy(editor, {
+    scopeItem: { case: 'textBlock', value: { content: 'console.log(42)', identifier: { case: 'label', value: 'code_block' } } }
+  });
+  assert.equal(nativeInserted.length, 0);
+  assert.equal(adapter.getComposerQuotes(editor).length, 2);
+  assert.equal(changeEvents.length, 2);
+
+  // 2. Non-quote @file scope item still passes directly through to originalGy
+  const fileScope = { scopeItem: { case: 'file', value: { absoluteUri: 'file:///repo/app.js' } } };
+  context.Gy(editor, fileScope);
+  assert.equal(nativeInserted.length, 1);
+  assert.equal(nativeInserted[0].item, fileScope);
+
+  // 3. Removing one quote keeps remaining quote and fires change listener
+  const firstId = adapter.getComposerQuotes(editor)[0].id;
+  assert.equal(adapter.removeComposerQuote(editor, firstId), true);
+  assert.equal(adapter.getComposerQuotes(editor).length, 1);
+
+  // Reset user-only text before flush check
+  editorJson = { root: { type: 'root', children: [{ type: 'paragraph', children: [{ type: 'text', text: '那这个呢？' }] }] } };
+  const flushed = adapter.flushComposerQuotesToEditor(editor);
+  assert.equal(flushed, 1);
+  assert.equal(adapter.getComposerQuotes(editor).length, 0);
+  // Quoted node must be prepended BEFORE existing user text in root.children
+  assert.equal(editorJson.root.children[0].children[0].type, 'quote-node');
+  assert.equal(editorJson.root.children[0].children[0].content, 'console.log(42)');
+  assert.equal(editorJson.root.children[1].children[0].text, '那这个呢？');
+
+  // 4. sendService fallback attaches quotes when sendUserCascadeMessage is called before DOM flush
+  context.Gy(editor, {
+    scopeItem: { case: 'textBlock', value: { content: '延迟发送的引用', identifier: { case: 'label', value: 'Quote' } } }
+  });
+  adapter.ensureRequestHook(svcAnchor);
+  await svcAnchor['__reactFiber$svc'].memoizedProps.value.sendUserCascadeMessage({
+    cascadeId: 'conv-pill-1',
+    items: [{ chunk: { case: 'text', value: '正文' } }]
+  });
+  assert.equal(sentPayloads.length, 1);
+  assert.equal(sentPayloads[0].items[0].chunk.case, 'item');
+  assert.equal(sentPayloads[0].items[0].chunk.value.scopeItem.value.content, '延迟发送的引用');
+  assert.equal(sentPayloads[0].items[1].chunk.value, '\n');
+  assert.equal(sentPayloads[0].items[2].chunk.value, '正文');
+
+  // 5. Turning codexComposerMedia off restores original Gy cleanly
+  adapter.setCodexComposerMedia(false);
+  assert.equal(context.Gy, originalGy);
+  unsub();
+  adapter.dispose();
+});
