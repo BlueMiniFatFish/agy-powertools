@@ -1,0 +1,58 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit tests
+        run: npm test
+
+      - name: Build release package
+        run: node scripts/build-release.mjs
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VER=$(node -p "require('./package.json').version")
+          TAG="v${VER}"
+          NOTES="docs/RELEASE_v${VER}.md"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG already exists, skipping."
+            exit 0
+          fi
+          ARGS=(
+            "$TAG"
+            "dist/agy-powertools-v${VER}.bundle.gz"
+            "dist/agy-powertools-v${VER}.bundle.gz.sha256"
+            "dist/agy-powertools-v${VER}.zip"
+            --title "Agy Powertools (Codex) ${TAG}"
+            --target "${GITHUB_SHA}"
+          )
+          if [[ -f "$NOTES" ]]; then
+            ARGS+=(--notes-file "$NOTES")
+          else
+            ARGS+=(--generate-notes)
+          fi
+          gh release create "${ARGS[@]}"
