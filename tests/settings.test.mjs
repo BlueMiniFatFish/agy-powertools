@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { createSettingsStore, DEFAULT_SETTINGS } from '../lib/settings.mjs';
@@ -43,6 +43,10 @@ test('settings persist, merge safely, and reject unknown options without changin
     store.set({ overviewQuota: false, composerQuotaHalo: false, composerQuotaHaloWindow: 'auto', composerWorkingBeam: false, composerWorkingBeamPalette: 'gemini' });
     assert.equal(store.get().messageEdit, true);
     assert.equal(store.get().fileContextMenu, true);
+    assert.equal(store.get().macAutoRelaunch, true);
+    store.set({ macAutoRelaunch: false });
+    assert.equal(store.get().macAutoRelaunch, false);
+    store.set({ macAutoRelaunch: true });
     assert.equal(store.get().sshCommandPaste, true);
     store.set({ sshCommandPaste: false });
     assert.equal(store.get().sshCommandPaste, false);
@@ -90,9 +94,24 @@ test('settings persist, merge safely, and reject unknown options without changin
     store.set({language:'en',contextLimit:1000000});assert.equal(store.get().contextLimit,1000000);assert.equal(store.get().language,'en');
     store.set({contextLimit:256000});assert.equal(store.get().contextLimit,256000);
     store.set({contextLimit:0});assert.equal(store.get().contextLimit,0);
+    assert.equal(DEFAULT_SETTINGS.codexStyle, true);
+    assert.equal(DEFAULT_SETTINGS.hdImages, true);
+    assert.equal(Object.hasOwn(DEFAULT_SETTINGS, 'codexStyleSource'), false);
+    assert.equal(Object.hasOwn(DEFAULT_SETTINGS, 'codexStyleApplyTheme'), false);
+    assert.equal(Object.hasOwn(DEFAULT_SETTINGS, 'codexProgress'), false);
+    assert.equal(Object.hasOwn(DEFAULT_SETTINGS, 'codexHomePath'), false);
+    assert.equal(Object.hasOwn(DEFAULT_SETTINGS, 'codexComposerMedia'), false);
+    assert.equal(store.get().codexStyle, true);
+    assert.equal(store.get().hdImages, true);
+    store.set({ codexStyle: false, hdImages: false });
+    assert.equal(store.get().codexStyle, false);
+    assert.equal(store.get().hdImages, false);
+    store.set({ codexStyle: true, hdImages: true });
     const before = readFileSync(join(directory, 'settings.json'), 'utf8');
-    for (const value of [{ compact: 'false' }, { userBubbleTint: 'yes' }, { userBubblePreset: 'neon' }, { userBubbleColor: 'red' }, { userBubbleColor: '#123;color:red' }, { userBubbleStrength: 5 }, { userBubbleStrength: 105 }, { userBubbleStrength: 20.5 }, { sessionSearch: 'yes' }, { composerQuotaHaloWindow: '1d' }, { unknown: true }, { toString: false }, {language:'invalid'}, {overviewRange:'custom'}, {overviewRange:'invalid'}, {accountViewMode:'grid'}, {accountQuotaWindow:'1h'}, {proxyUrl:'ftp://127.0.0.1:21'}, {proxyUrl:'http://127.0.0.1:7897;calc'}, {proxyBypass:'localhost"bad'}, {contextLimit:999999}, []]) assert.throws(() => store.set(value), /设置/);
+    for (const value of [{ compact: 'false' }, { userBubbleTint: 'yes' }, { userBubblePreset: 'neon' }, { userBubbleColor: 'red' }, { userBubbleColor: '#123;color:red' }, { userBubbleStrength: 5 }, { userBubbleStrength: 105 }, { userBubbleStrength: 20.5 }, { sessionSearch: 'yes' }, { composerQuotaHaloWindow: '1d' }, { codexStyle: 'yes' }, { codexStyleSource: 'preset' }, { codexStyleApplyTheme: true }, { codexProgress: true }, { codexHomePath: '~/.codex' }, { codexComposerMedia: true }, { hdImages: 'yes' }, { unknown: true }, { toString: false }, {language:'invalid'}, {overviewRange:'custom'}, {overviewRange:'invalid'}, {accountViewMode:'grid'}, {accountQuotaWindow:'1h'}, {proxyUrl:'ftp://127.0.0.1:21'}, {proxyUrl:'http://127.0.0.1:7897;calc'}, {proxyBypass:'localhost"bad'}, {contextLimit:999999}, []]) assert.throws(() => store.set(value), /设置/);
     assert.equal(readFileSync(join(directory, 'settings.json'), 'utf8'), before);
     store.set(DEFAULT_SETTINGS); assert.deepEqual(store.get(), DEFAULT_SETTINGS);
+    writeFileSync(join(directory, 'settings.json'), JSON.stringify({ ...DEFAULT_SETTINGS, codexProgress: false, codexStyleSource: 'local', codexHomePath: '~/.codex', codexStyleApplyTheme: false, codexComposerMedia: false }), 'utf8');
+    assert.deepEqual(store.get(), DEFAULT_SETTINGS);
   } finally { rmSync(directory, { recursive: true, force: true }); }
 });

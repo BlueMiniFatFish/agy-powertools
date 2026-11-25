@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="330" viewBox="0 0 1200 330">
+  <defs>
+    <style>
+      .font { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif; }
+    </style>
+  </defs>
+  <rect width="1200" height="330" rx="16" fill="#181818"/>
+  <text x="40" y="48" class="font" font-size="16" font-weight="600" fill="#FFFFFF">Codex 增强扩展</text>
+  <text x="1160" y="48" text-anchor="end" class="font" font-size="12.5" fill="#A5A5A5">所有自研能力收拢于首栏，零繁琐子菜单</text>
+
+  <!-- Main card with 2 switches -->
+  <rect x="40" y="68" width="1120" height="224" rx="14" fill="#212121" stroke="#383838"/>
+
+  <!-- Row 1: Codex Style Experience -->
+  <text x="68" y="108" class="font" font-size="15" font-weight="600" fill="#FFFFFF">Codex 风格体验</text>
+  <text x="68" y="134" class="font" font-size="13" fill="#A5A5A5">默认开启。一键应用 Codex 排版与配色、流式工作进度、大尺寸输入框贴图及横向右键操作胶囊，优先于「紧凑排版」；</text>
+  <text x="68" y="155" class="font" font-size="13" fill="#A5A5A5">开启下方「用户消息气泡着色」时可单独覆盖气泡颜色。</text>
+  <rect x="1088" y="110" width="44" height="24" rx="12" fill="#3A83F7"/>
+  <circle cx="1120" cy="122" r="9" fill="#FFFFFF"/>
+
+  <line x1="68" y1="180" x2="1132" y2="180" stroke="#323232"/>
+
+  <!-- Row 2: HD Original Images -->
+  <text x="68" y="218" class="font" font-size="15" font-weight="600" fill="#FFFFFF">高清原图上传（≤ 3 MiB）</text>
+  <text x="68" y="244" class="font" font-size="13" fill="#A5A5A5">默认开启。3 MiB 内原图无损直传，超限保留原始宽高并自适应降质至 3 MiB 内，避免默认 1 MiB 压缩糊图。</text>
+  <rect x="1088" y="216" width="44" height="24" rx="12" fill="#3A83F7"/>
+  <circle cx="1120" cy="228" r="9" fill="#FFFFFF"/>
+</svg>

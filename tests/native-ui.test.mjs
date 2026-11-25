@@ -871,7 +871,7 @@ test('userBubbleStrength updates CSS variables and readable foreground contrast,
     queueMicrotask(() => {
       if (req.method === 'settings.get') {
         p.context.__agyPowertoolsReceive(req.id, {
-          enabled: true, timing: true, userBubbleTint: true,
+          enabled: true, timing: true, codexStyle: false, userBubbleTint: true,
           userBubblePreset: 'custom', userBubbleColor: '#173E76', userBubbleStrength: 100, language: 'zh-CN'
         });
       } else if (req.method === 'state') {
@@ -886,7 +886,7 @@ test('userBubbleStrength updates CSS variables and readable foreground contrast,
     });
   };
   p.context.__agyInitialSettings = {
-    enabled: true, timing: true, userBubbleTint: true,
+    enabled: true, timing: true, codexStyle: false, userBubbleTint: true,
     userBubblePreset: 'custom', userBubbleColor: '#173E76', userBubbleStrength: 100, language: 'zh-CN'
   };
   vm.runInContext(source, p.context);
@@ -1262,4 +1262,797 @@ test('loadDashboard returns local dashboard immediately without blocking on slow
   assert.equal(p.context.__agyPowertools.dashboard.requests[0].id, 'local-fast-1');
   resolveQuota?.({ response: { groups: [] } });
   p.context.__agyPowertools.dispose();
+});
+
+test('codexStyle defaults inject ordered CSS rules, apply DOM attrs/vars, respect toggles, and clean up on dispose', async () => {
+  const p = page(true);
+  const styleProps = new Map();
+  p.document.documentElement.style = {
+    setProperty: (k, v) => styleProps.set(k, v),
+    removeProperty: k => styleProps.delete(k)
+  };
+  let capturedEnv = null;
+  let currentSettings = { enabled: true, compact: true, codexStyle: true };
+  p.context.__agyNativeAdapter.installPage = () => true;
+  p.context.__agyPanels = env => {
+    capturedEnv = env;
+    return { Page: () => null, Sidebar: () => null, dispose() {} };
+  };
+  p.context.__agyInitialSettings = { ...currentSettings };
+  p.context.__agyPowertoolsHost = raw => {
+    const req = JSON.parse(raw);
+    queueMicrotask(() => {
+      if (req.method === 'settings.get') {
+        p.context.__agyPowertoolsReceive(req.id, { ...currentSettings });
+      } else if (req.method === 'settings.set') {
+        currentSettings = { ...currentSettings, ...req.settings };
+        p.context.__agyPowertoolsReceive(req.id, { ...currentSettings });
+      } else {
+        p.context.__agyPowertoolsReceive(req.id, {});
+      }
+    });
+  };
+  vm.runInContext(source, p.context);
+  await new Promise(r => setImmediate(r));
+
+  assert.equal(p.nodes.length, 1);
+  const css = p.nodes[0].textContent;
+  const compactUnlayeredIdx = css.indexOf('html[data-agy-compact] [data-agy-powertools-root="completion"]');
+  const codexUnlayeredIdx = css.indexOf('html[data-agy-codex-style] [data-testid="conversation-view"]');
+  const compactThemeIdx = css.indexOf('html[data-agy-compact] [data-testid="agent-response"] [data-markdown-root] > :last-child');
+  const codexThemeIdx = css.indexOf('html[data-agy-codex-style] [data-testid="agent-response"] [data-markdown-root] h1');
+  const codexHarmonyIdx = css.indexOf('html[data-agy-codex-style][data-agy-codex-theme]{');
+  assert.ok(compactUnlayeredIdx > 0 && codexUnlayeredIdx > compactUnlayeredIdx);
+  assert.ok(compactThemeIdx > 0 && codexThemeIdx > compactThemeIdx);
+  assert.ok(codexHarmonyIdx > codexThemeIdx);
+  assert.ok(!css.includes('html[data-agy-codex-style] [data-testid="conversation-view"]{' + '--conversation-nav-reserve'));
+
+  assert.equal(p.document.documentElement.hasAttribute('data-agy-compact'), true);
+  assert.equal(p.document.documentElement.hasAttribute('data-agy-codex-style'), true);
+  assert.equal(p.document.documentElement.hasAttribute('data-agy-codex-theme'), true);
+  assert.equal(p.document.documentElement.hasAttribute('data-agy-codex-local'), false);
+  assert.equal(p.document.documentElement.hasAttribute('data-agy-codex-font-size'), true);
+  assert.equal(p.document.documentElement.hasAttribute('data-agy-codex-code-font-size'), true);
+  assert.equal(styleProps.get('--agy-codex-max-width'), '48rem');
+  assert.equal(styleProps.get('--agy-codex-line-height'), '1.625');
+  assert.equal(styleProps.get('--agy-codex-font-size'), '14px');
+  assert.equal(styleProps.get('--agy-codex-code-font-size'), '12px');
+  assert.equal(styleProps.get('--agy-codex-dark-surface'), '#181818');
+  assert.equal(styleProps.get('--agy-codex-dark-accent'), '#3A83F7');
+  assert.equal(styleProps.get('--agy-codex-dark-border'), '#383838');
+  assert.equal(styleProps.get('--agy-codex-dark-primary-fg'), '#FFFFFF');
+  assert.equal(styleProps.get('--agy-codex-dark-card'), '#212121');
+  assert.equal(styleProps.get('--agy-codex-dark-bubble-bg'), '#173E76');
+  assert.equal(styleProps.get('--agy-codex-light-bubble-bg'), '#E8F3FE');
+  assert.equal(styleProps.get('--agy-codex-dark-bubble-border'), 'transparent');
+  assert.ok(css.includes('--primary-foreground:var(--agy-codex-dark-primary-fg,#FFFFFF)'));
+  assert.ok(css.includes(':is(html.dark[data-agy-codex-style][data-agy-codex-font-sans],html[data-agy-codex-style][data-agy-codex-font-sans] .dark)'));
+  assert.ok(css.includes(':is(html.dark[data-agy-codex-style][data-agy-codex-font-mono],html[data-agy-codex-style][data-agy-codex-font-mono] .dark)'));
+  assert.ok(css.includes('html[data-agy-codex-style] [data-agy-powertools-root="completion"]{margin-block:0}'));
+  assert.ok(css.includes('text-decoration:underline dashed .5px currentColor!important'));
+  assert.ok(css.includes('html[data-agy-codex-style][data-agy-codex-theme]:not([data-agy-user-bubble]) [data-testid="user-input-step"] [data-testid="user-message-bubble"]'));
+  assert.ok(css.includes(':is(html.dark[data-agy-codex-style][data-agy-codex-theme]:not([data-agy-user-bubble]),html[data-agy-codex-style][data-agy-codex-theme]:not([data-agy-user-bubble]) .dark)'));
+  assert.equal(css.includes('html[data-agy-codex-style][data-agy-codex-code-font-size] [data-testid="agent-response"] [data-markdown-root] code:not(pre *)'), false);
+
+  // Turn off codexStyle -> removes all codex attrs/vars while preserving data-agy-compact
+  await capturedEnv.change({ codexStyle: false });
+  assert.equal(p.document.documentElement.hasAttribute('data-agy-codex-style'), false);
+  assert.equal(p.document.documentElement.hasAttribute('data-agy-codex-progress'), false);
+  assert.equal(p.document.documentElement.hasAttribute('data-agy-codex-composer-media'), false);
+  assert.equal(p.document.documentElement.hasAttribute('data-agy-codex-theme'), false);
+  assert.equal(p.document.documentElement.hasAttribute('data-agy-compact'), true);
+  assert.equal([...styleProps.keys()].some(k => k.startsWith('--agy-codex-')), false);
+
+  // Re-enable then dispose -> removes all codex attrs and CSS vars cleanly
+  await capturedEnv.change({ codexStyle: true });
+  assert.equal(p.document.documentElement.hasAttribute('data-agy-codex-style'), true);
+  assert.equal(p.document.documentElement.hasAttribute('data-agy-codex-progress'), true);
+  assert.equal(p.document.documentElement.hasAttribute('data-agy-codex-composer-media'), true);
+  assert.equal(p.document.documentElement.hasAttribute('data-agy-codex-theme'), true);
+  p.context.__agyPowertools.dispose();
+  assert.equal(p.document.documentElement.hasAttribute('data-agy-codex-style'), false);
+  assert.equal(p.document.documentElement.hasAttribute('data-agy-codex-progress'), false);
+  assert.equal(p.document.documentElement.hasAttribute('data-agy-codex-composer-media'), false);
+  assert.equal(p.document.documentElement.hasAttribute('data-agy-codex-theme'), false);
+  assert.equal([...styleProps.keys()].some(k => k.startsWith('--agy-codex-')), false);
+});
+
+test('silent local Codex profile auto-detection applies custom profile when found and cleans up on disable/dispose', async () => {
+  const p = page(true);
+  const styleProps = new Map();
+  p.document.documentElement.style = {
+    setProperty: (k, v) => styleProps.set(k, v),
+    removeProperty: k => styleProps.delete(k)
+  };
+  const codexHelpers = await import('../lib/codex-style-helpers.mjs');
+  const inspectCalls = [];
+  let capturedEnv = null;
+  const presetConfig = codexHelpers.defaultCodexStylePreset();
+  const localConfig = {
+    id: 'local',
+    dark: {
+      ...codexHelpers.deriveCodexPalette({ surface: '#121212', ink: '#F5F5F5', accent: '#60A5FA', contrast: 75, fonts: { ui: 'Inter', code: '"JetBrains Mono", monospace' } }, true, presetConfig.dark)
+    },
+    light: {
+      ...codexHelpers.deriveCodexPalette({ surface: '#FAFAFA', ink: '#111111', accent: '#2563EB', contrast: 50 }, false, presetConfig.light)
+    },
+    typography: { maxWidth: '64rem', pagesFullWidth: true, fontSmoothing: false, lineHeight: 1.65, blockGapPx: 14, uiFontSizePx: 15, codeFontSizePx: 13 }
+  };
+  const profile = { detected: true, sources: { configToml: { path: '/Users/test/.codex/config.toml', exists: true, parsed: true } }, preset: presetConfig, local: localConfig, inspectedAt: 1700000000000 };
+  p.context.__agyCodexStyle = codexHelpers;
+  let currentSettings = { enabled: true, codexStyle: true };
+  p.context.__agyInitialSettings = { ...currentSettings };
+  p.context.__agyNativeAdapter.installPage = () => true;
+  p.context.__agyPanels = env => {
+    capturedEnv = env;
+    return { Page: () => null, Sidebar: () => null, dispose() {} };
+  };
+  p.context.__agyPowertoolsHost = raw => {
+    const req = JSON.parse(raw);
+    queueMicrotask(() => {
+      if (req.method === 'settings.get') {
+        p.context.__agyPowertoolsReceive(req.id, { ...currentSettings });
+      } else if (req.method === 'settings.set') {
+        currentSettings = { ...currentSettings, ...req.settings };
+        p.context.__agyPowertoolsReceive(req.id, { ...currentSettings });
+      } else if (req.method === 'codexStyle.inspect') {
+        inspectCalls.push(req.force);
+        p.context.__agyPowertoolsReceive(req.id, profile);
+      } else {
+        p.context.__agyPowertoolsReceive(req.id, {});
+      }
+    });
+  };
+  vm.runInContext(source, p.context);
+  await new Promise(r => setImmediate(r));
+  await new Promise(r => setImmediate(r));
+
+  assert.equal(inspectCalls.length, 1);
+  assert.equal(p.document.documentElement.hasAttribute('data-agy-codex-local'), true);
+  assert.equal(p.document.documentElement.hasAttribute('data-agy-codex-font-size'), true);
+  assert.equal(p.document.documentElement.hasAttribute('data-agy-codex-code-font-size'), true);
+  assert.equal(p.document.documentElement.hasAttribute('data-agy-codex-font-sans'), true);
+  assert.equal(p.document.documentElement.hasAttribute('data-agy-codex-font-mono'), true);
+  assert.equal(styleProps.get('--agy-codex-max-width'), '64rem');
+  assert.equal(styleProps.get('--agy-codex-font-size'), '15px');
+  assert.equal(styleProps.get('--agy-codex-code-font-size'), '13px');
+  assert.equal(styleProps.get('--agy-codex-dark-font-sans'), '"Inter", var(--font-sans, system-ui, -apple-system, sans-serif)');
+  assert.equal(styleProps.get('--agy-codex-dark-font-mono'), '"JetBrains Mono", monospace, var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace)');
+  assert.equal(styleProps.has('--agy-codex-light-font-sans'), false);
+  assert.equal(styleProps.get('--agy-codex-dark-surface'), '#121212');
+  assert.equal(styleProps.get('--agy-codex-dark-primary-fg'), '#111827');
+  assert.equal(capturedEnv.codexStyleProfile().detected, true);
+
+  // Disabling codexStyle clears stale local attrs & CSS vars cleanly; re-enabling restores them without extra inspect call
+  await capturedEnv.change({ codexStyle: false });
+  assert.equal(p.document.documentElement.hasAttribute('data-agy-codex-local'), false);
+  assert.equal(p.document.documentElement.hasAttribute('data-agy-codex-font-sans'), false);
+  assert.equal(p.document.documentElement.hasAttribute('data-agy-codex-font-mono'), false);
+  assert.equal([...styleProps.keys()].some(k => k.startsWith('--agy-codex-')), false);
+
+  await capturedEnv.change({ codexStyle: true });
+  assert.deepEqual(inspectCalls, [false]);
+  assert.equal(p.document.documentElement.hasAttribute('data-agy-codex-local'), true);
+
+  p.context.__agyPowertools.dispose();
+  assert.equal(p.document.documentElement.hasAttribute('data-agy-codex-local'), false);
+  assert.equal(p.document.documentElement.hasAttribute('data-agy-codex-font-sans'), false);
+  assert.equal([...styleProps.keys()].some(k => k.startsWith('--agy-codex-')), false);
+});
+
+test('Settings panel collapses Codex Extensions to one single switch and places hdImages under Conversation enhancements', async () => {
+  const panelsSource = readFileSync(new URL('../lib/native-panels.js', import.meta.url), 'utf8');
+  let opts = { enabled: true, language: 'en', codexStyle: true, hdImages: true, compact: true, userBubbleTint: false, fileContextMenu: true };
+  const changes = [];
+  const states = [];
+  let idx = 0;
+  const React = {
+    createElement: (type, props, ...children) => ({ type, props: props || {}, children }),
+    Fragment: 'fragment',
+    useState: init => { const n = idx++; if (!(n in states)) states[n] = typeof init === 'function' ? init() : init; return [states[n], v => { states[n] = v; }]; },
+    useSyncExternalStore: (_sub, getSnap) => getSnap(),
+    useEffect: () => {},
+    useId: () => 'id-1'
+  };
+  const ctx = vm.createContext({
+    React,
+    document: { createElement: () => ({ dataset: {}, remove() {} }), head: { append() {} }, documentElement: { classList: { contains: () => true } } },
+    location: { pathname: '/powertools' },
+    UP: 'row', TP: 'card', VP: 'section', Uy: 'button', XP: 'switch',
+    kT: 'menu', lT: 'menu-trigger', mT: 'menu-list', nT: 'menu-item', dq: 'icon', Sy: 'tooltip'
+  });
+  vm.runInContext(panelsSource, ctx);
+  const panels = ctx.__agyPanels({
+    t: v => v,
+    options: () => opts,
+    settingsError: () => '',
+    state: () => ({ contextWindow: { maxTokens: 0 } }),
+    change: async patch => { changes.push(patch); opts = { ...opts, ...patch }; },
+    subscribe: () => () => {},
+    revision: () => 0
+  });
+  const expand = node => {
+    if (!node || typeof node !== 'object') return node;
+    if (Array.isArray(node)) return node.map(expand);
+    if (typeof node.type === 'function' && node.type.name === 'CodexExtensionsSection') {
+      return expand(node.type(node.props));
+    }
+    return {
+      ...node,
+      ...(node.props ? {
+        props: {
+          ...node.props,
+          ...(node.props.rightElement !== undefined ? { rightElement: expand(node.props.rightElement) } : {}),
+          ...(node.props.description !== undefined ? { description: expand(node.props.description) } : {})
+        }
+      } : {}),
+      children: Array.isArray(node.children) ? node.children.map(expand) : expand(node.children)
+    };
+  };
+  const childrenOf = node => [...(Array.isArray(node.children) ? node.children : [node.children]), node.props?.label, node.props?.description, node.props?.rightElement];
+  const find = (node, id) => {
+    if (!node || typeof node !== 'object') return null;
+    if (Array.isArray(node)) {
+      for (const item of node) { const hit = find(item, id); if (hit) return hit; }
+      return null;
+    }
+    if (node.props?.['data-testid'] === id) return node;
+    for (const val of childrenOf(node)) {
+      const hit = find(val, id);
+      if (hit) return hit;
+    }
+    return null;
+  };
+  const findSection = (node, title) => {
+    if (!node || typeof node !== 'object') return null;
+    if (Array.isArray(node)) {
+      for (const item of node) { const hit = findSection(item, title); if (hit) return hit; }
+      return null;
+    }
+    if (node.type === 'section' && node.props?.title === title) return node;
+    for (const val of childrenOf(node)) {
+      const hit = findSection(val, title);
+      if (hit) return hit;
+    }
+    return null;
+  };
+  const textOf = node => {
+    if (node == null || typeof node === 'boolean') return '';
+    if (typeof node === 'string' || typeof node === 'number') return String(node);
+    if (Array.isArray(node)) return node.map(textOf).join('');
+    if (typeof node === 'object') return textOf(node.children);
+    return '';
+  };
+  const render = () => { idx = 0; return expand(panels.Settings()); };
+
+  let tree = render();
+  const codexSection = findSection(tree, 'Codex Extensions');
+  const interfaceSection = findSection(tree, 'Interface & display');
+  const convSection = findSection(tree, 'Conversation enhancements');
+  assert.ok(codexSection);
+  assert.ok(interfaceSection);
+  assert.ok(convSection);
+
+  // Codex Extensions isolates codexStyle and hdImages cleanly together without clutter sub-panels
+  assert.ok(find(codexSection, 'agy-setting-codexStyle'));
+  assert.ok(find(codexSection, 'agy-setting-hdImages'));
+  assert.equal(find(codexSection, 'agy-setting-hdImages').props.checked, true);
+  assert.equal(find(codexSection, 'agy-setting-row-codexStylePanel'), null);
+  assert.equal(find(codexSection, 'agy-setting-codexProgress'), null);
+  assert.equal(find(codexSection, 'agy-setting-codexComposerMedia'), null);
+  assert.equal(find(codexSection, 'agy-codex-source-preset'), null);
+  assert.equal(find(codexSection, 'agy-codex-source-local'), null);
+  assert.equal(find(codexSection, 'agy-setting-codexStyleApplyTheme'), null);
+  assert.equal(find(codexSection, 'agy-codex-path-input'), null);
+
+  // Author sections remain completely free of our extension controls
+  assert.equal(find(interfaceSection, 'agy-setting-codexStyle'), null);
+  assert.equal(find(interfaceSection, 'agy-setting-hdImages'), null);
+  assert.equal(find(convSection, 'agy-setting-codexStyle'), null);
+  assert.equal(find(convSection, 'agy-setting-hdImages'), null);
+  assert.ok(textOf(find(interfaceSection, 'agy-setting-row-compact').props.description).includes('Currently overridden by Codex-style experience'));
+  assert.ok(textOf(find(interfaceSection, 'agy-setting-row-userBubbleTint').props.description).includes('Using Codex borderless bubble by default'));
+  assert.ok(textOf(find(convSection, 'agy-setting-row-stageUpdates').props.description).includes('Currently upgraded by Codex-style experience with concise output & localized tool summaries'));
+
+  // Enabling userBubbleTint overrides Codex default bubble color while keeping Codex theme active
+  find(interfaceSection, 'agy-setting-userBubbleTint').props.onCheckedChange(true);
+  await new Promise(r => setImmediate(r));
+  tree = render();
+  assert.ok(textOf(find(tree, 'agy-setting-row-userBubbleTint').props.description).includes('Overriding Codex default bubble while keeping Codex theme'));
+  find(tree, 'agy-setting-userBubbleTint').props.onCheckedChange(false);
+  await new Promise(r => setImmediate(r));
+  tree = render();
+  assert.ok(textOf(find(tree, 'agy-setting-row-userBubbleTint').props.description).includes('Using Codex borderless bubble by default'));
+
+  // Toggle hdImages from Codex Extensions section
+  find(codexSection, 'agy-setting-hdImages').props.onCheckedChange(false);
+  await new Promise(r => setImmediate(r));
+  assert.equal(changes.at(-1)?.hdImages, false);
+
+  // Turning off codexStyle removes override notices cleanly
+  find(tree, 'agy-setting-codexStyle').props.onCheckedChange(false);
+  await new Promise(r => setImmediate(r));
+  assert.equal(changes.at(-1)?.codexStyle, false);
+  tree = render();
+  assert.equal(textOf(find(tree, 'agy-setting-row-compact').props.description).includes('Currently overridden'), false);
+  assert.equal(textOf(find(tree, 'agy-setting-row-userBubbleTint').props.description).includes('Using Codex borderless bubble by default'), false);
+  assert.equal(textOf(find(tree, 'agy-setting-row-stageUpdates').props.description).includes('Currently upgraded by Codex-style experience'), false);
+  panels.dispose();
+});
+
+test('codexStyle works without __agyCodexStyle helper using inline fallback and dedupes concurrent inspect calls', async () => {
+  const p = page(true);
+  const styleProps = new Map();
+  p.document.documentElement.style = {
+    setProperty: (k, v) => styleProps.set(k, v),
+    removeProperty: k => styleProps.delete(k)
+  };
+  let capturedEnv = null;
+  let resolveInspect = null;
+  let inspectCount = 0;
+  p.context.__agyInitialSettings = { enabled: true, codexStyle: true };
+  p.context.__agyNativeAdapter.installPage = () => true;
+  p.context.__agyPanels = env => {
+    capturedEnv = env;
+    return { Page: () => null, Sidebar: () => null, dispose() {} };
+  };
+  p.context.__agyPowertoolsHost = raw => {
+    const req = JSON.parse(raw);
+    if (req.method === 'codexStyle.inspect') {
+      inspectCount++;
+      resolveInspect = payload => p.context.__agyPowertoolsReceive(req.id, payload);
+      return;
+    }
+    queueMicrotask(() => {
+      if (req.method === 'settings.get') p.context.__agyPowertoolsReceive(req.id, p.context.__agyInitialSettings);
+      else if (req.method === 'settings.set') {
+        p.context.__agyInitialSettings = { ...p.context.__agyInitialSettings, ...req.settings };
+        p.context.__agyPowertoolsReceive(req.id, { ...p.context.__agyInitialSettings });
+      } else p.context.__agyPowertoolsReceive(req.id, {});
+    });
+  };
+  vm.runInContext(source, p.context);
+  await new Promise(r => setImmediate(r));
+
+  // Concurrent non-forced inspect deduplicates onto the in-flight request
+  const p1 = capturedEnv.loadCodexStyle(false);
+  const p2 = capturedEnv.loadCodexStyle(false);
+  assert.equal(p1, p2);
+  assert.equal(inspectCount, 1);
+  assert.equal(capturedEnv.codexStyleLoading(), true);
+
+  resolveInspect({
+    detected: true,
+    sources: { configToml: { path: '/Users/test/.codex/config.toml', exists: true, parsed: true } },
+    local: {
+      typography: { maxWidth: '64rem', uiFontSizePx: 16, codeFontSizePx: 13, lineHeight: 1.65, blockGapPx: 14, fontSmoothing: true },
+      dark: { fonts: { ui: 'Inter', code: 'Fira Code' } }
+    }
+  });
+  await p1;
+  assert.equal(capturedEnv.codexStyleLoading(), false);
+  assert.equal(p.document.documentElement.hasAttribute('data-agy-codex-local'), true);
+  assert.equal(p.document.documentElement.hasAttribute('data-agy-codex-font-size'), true);
+  assert.equal(p.document.documentElement.hasAttribute('data-agy-codex-code-font-size'), true);
+  assert.equal(p.document.documentElement.hasAttribute('data-agy-codex-font-mono'), true);
+  assert.equal(p.document.documentElement.hasAttribute('data-agy-codex-font-sans'), true);
+  assert.equal(styleProps.get('--agy-codex-max-width'), '64rem');
+  assert.equal(styleProps.get('--agy-codex-font-size'), '16px');
+  assert.equal(styleProps.get('--agy-codex-code-font-size'), '13px');
+  assert.equal(styleProps.get('--agy-codex-dark-font-sans'), '"Inter", var(--font-sans, system-ui, -apple-system, sans-serif)');
+  assert.equal(styleProps.get('--agy-codex-dark-font-mono'), '"Fira Code", var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace)');
+  assert.equal(styleProps.has('--agy-codex-light-font-sans'), false);
+  assert.equal(styleProps.get('--agy-codex-dark-surface'), '#181818');
+  assert.equal(styleProps.get('--agy-codex-dark-primary-fg'), '#FFFFFF');
+  assert.equal(styleProps.get('--agy-codex-dark-card'), '#212121');
+
+  // Disabling codexStyle clears data-agy-codex-local cleanly
+  await capturedEnv.change({ codexStyle: false });
+  assert.equal(p.document.documentElement.hasAttribute('data-agy-codex-local'), false);
+
+  p.context.__agyPowertools.dispose();
+});
+
+test('codexStyle drives codexProgress DOM attribute, adapter sync, worked label cleanup, forwards language, and dispose restoration', async () => {
+  const p = page(true);
+  const progressCalls = [];
+  const languageCalls = [];
+  const mainSpan = { isConnected: true, textContent: 'Worked for 5m 40s', contains: () => false };
+  const updSpan = { isConnected: true, textContent: '\u00b7 4 updates', contains: () => false };
+  const attrs = new Map();
+  const progressTrigger = {
+    isConnected: true,
+    get textContent() { return `${mainSpan.textContent} ${updSpan.textContent}`; },
+    closest: () => null,
+    querySelectorAll: sel => sel === 'span' ? [mainSpan, updSpan] : [],
+    getAttribute: k => attrs.get(k) ?? null,
+    setAttribute: (k, v) => attrs.set(k, v),
+    removeAttribute: k => attrs.delete(k)
+  };
+  const response = {
+    isConnected: true,
+    firstChild: null,
+    children: [],
+    insertBefore(child) { child.isConnected = true; this.children.unshift(child); },
+    closest: () => null,
+    querySelector: sel => sel === '[data-testid="progress-updates-collapsible"]' ? progressTrigger : null,
+    querySelectorAll: () => []
+  };
+  p.document.querySelectorAll = sel => sel === '[data-testid="agent-response"]' ? [response] : [];
+  p.context.HU = m => m?.index;
+  p.context.React = { createElement: (type, props, ...children) => ({ type, props: props || {}, children }) };
+  p.context.ReactDOM = { createRoot: () => ({ render() {}, unmount() {} }) };
+  p.context.location.pathname = '/c/conv-progress';
+  p.context.__agyNativeAdapter.wrap = el => el;
+  p.context.__agyNativeAdapter.installPage = () => true;
+  p.context.__agyNativeAdapter.fiber = () => ({ memoizedProps: { container: { steps: [{ step: { case: 'userInput' }, metadata: { index: 0 } }] } }, return: null });
+  p.context.__agyNativeAdapter.setCodexProgress = val => { progressCalls.push(val); };
+  p.context.__agyNativeAdapter.setUiLanguage = lang => { languageCalls.push(lang); };
+  let currentSettings = { enabled: true, timing: true, codexStyle: true, language: 'zh-CN' };
+  p.context.__agyInitialSettings = { ...currentSettings };
+  let capturedEnv = null;
+  p.context.__agyPanels = env => {
+    capturedEnv = env;
+    return { Page: () => null, Sidebar: () => null, dispose() {} };
+  };
+  p.context.__agyPowertoolsHost = raw => {
+    const req = JSON.parse(raw);
+    queueMicrotask(() => {
+      if (req.method === 'settings.get') p.context.__agyPowertoolsReceive(req.id, { ...currentSettings });
+      else if (req.method === 'settings.set') {
+        currentSettings = { ...currentSettings, ...req.settings };
+        p.context.__agyPowertoolsReceive(req.id, { ...currentSettings });
+      } else if (req.method === 'state') {
+        p.context.__agyPowertoolsReceive(req.id, {
+          conversationId: 'conv-progress',
+          turns: [{ turnNumber: 1, stepIndexStart: 0, stepIndexEnd: 4, status: 'complete', completedAtIso: '2026-11-24T00:00:00Z', durationMs: 340000, toolCalls: [] }],
+          requests: []
+        });
+      } else p.context.__agyPowertoolsReceive(req.id, {});
+    });
+  };
+  vm.runInContext(source, p.context);
+  await new Promise(r => setTimeout(r, 30));
+
+  assert.equal(p.document.documentElement.hasAttribute('data-agy-codex-progress'), true);
+  assert.ok(progressCalls.includes(true));
+  assert.ok(languageCalls.includes('zh-CN'));
+  assert.ok(p.nodes[0].textContent.includes('html[data-agy-codex-progress] [data-testid="progress-updates-timeline"]'));
+  assert.ok(p.nodes[0].textContent.includes('margin-inline-start:-.5rem;margin-inline-end:0'));
+  assert.ok(p.nodes[0].textContent.includes(':not([data-testid="step-plan-chip"])'));
+  assert.ok(p.nodes[0].textContent.includes('[data-testid="step-plan-chip"]{margin-left:4px!important'));
+  assert.ok(p.nodes[0].textContent.includes('[data-step-index] > :is(.relative,.w-full > .relative) > button[aria-expanded]:not([data-testid="step-plan-chip"])'));
+  assert.equal(mainSpan.textContent, '用时 5分40秒');
+  assert.equal(updSpan.textContent, '');
+
+  await capturedEnv.change({ language: 'zh-TW' });
+  assert.equal(languageCalls.at(-1), 'zh-TW');
+  await capturedEnv.change({ language: 'zh-CN' });
+  assert.equal(languageCalls.at(-1), 'zh-CN');
+
+  await capturedEnv.change({ codexStyle: false });
+  assert.equal(p.document.documentElement.hasAttribute('data-agy-codex-progress'), false);
+  assert.equal(progressCalls.at(-1), false);
+  assert.equal(mainSpan.textContent, '用时 5分40秒 4 条进度');
+
+  await capturedEnv.change({ codexStyle: true });
+  assert.equal(mainSpan.textContent, '用时 5分40秒');
+
+  p.context.__agyPowertools.dispose();
+  assert.equal(p.document.documentElement.hasAttribute('data-agy-codex-progress'), false);
+  assert.equal(mainSpan.textContent, 'Worked for 5m 40s');
+  assert.equal(updSpan.textContent, '\u00b7 4 updates');
+});
+
+test('hdImages forwards option to adapter.setHdImages on mount and change', async () => {
+  const p = page(true);
+  const hdCalls = [];
+  p.context.React = { createElement: (type, props, ...children) => ({ type, props: props || {}, children }) };
+  p.context.ReactDOM = { createRoot: () => ({ render() {}, unmount() {} }) };
+  p.context.location.pathname = '/c/conv-hd';
+  p.context.__agyNativeAdapter.wrap = el => el;
+  p.context.__agyNativeAdapter.installPage = () => true;
+  p.context.__agyNativeAdapter.setHdImages = val => { hdCalls.push(val); };
+  let currentSettings = { enabled: true, hdImages: true, language: 'zh-CN' };
+  p.context.__agyInitialSettings = { ...currentSettings };
+  let capturedEnv = null;
+  p.context.__agyPanels = env => {
+    capturedEnv = env;
+    return { Page: () => null, Sidebar: () => null, dispose() {} };
+  };
+  p.context.__agyPowertoolsHost = raw => {
+    const req = JSON.parse(raw);
+    queueMicrotask(() => {
+      if (req.method === 'settings.get') p.context.__agyPowertoolsReceive(req.id, { ...currentSettings });
+      else if (req.method === 'settings.set') {
+        currentSettings = { ...currentSettings, ...req.settings };
+        p.context.__agyPowertoolsReceive(req.id, { ...currentSettings });
+      } else p.context.__agyPowertoolsReceive(req.id, {});
+    });
+  };
+  vm.runInContext(source, p.context);
+  await new Promise(r => setTimeout(r, 30));
+
+  assert.ok(hdCalls.includes(true));
+  await capturedEnv.change({ hdImages: false });
+  assert.equal(hdCalls.at(-1), false);
+  await capturedEnv.change({ hdImages: true });
+  assert.equal(hdCalls.at(-1), true);
+  p.context.__agyPowertools.dispose();
+});
+
+test('codexStyle suppresses premature ResponseActions and Completion while idle-status-text is active and mounts once subagents complete', async () => {
+  const p = page(true);
+  p.context.location.pathname = '/c/conv-idle-bar';
+  let idleVisible = true;
+  const idleBadge = { isConnected: true };
+  const feedbackParent = {
+    isConnected: true,
+    children: [],
+    insertBefore(node) { node.isConnected = true; this.children.push(node); }
+  };
+  const feedbackBtn = { parentElement: feedbackParent };
+  const scope = {
+    querySelector: sel => {
+      if (sel === '[data-testid="idle-status-text"]') return idleVisible ? idleBadge : null;
+      if (sel === '[aria-label="Bad response"]' || sel === '[aria-label="Good response"]') return feedbackBtn;
+      return null;
+    },
+    querySelectorAll: () => []
+  };
+  const response = {
+    isConnected: true,
+    firstChild: null,
+    children: [],
+    insertBefore(child) { child.isConnected = true; this.children.unshift(child); },
+    closest: sel => sel === '[data-turn-content]' ? scope : null,
+    querySelector: sel => {
+      if (sel === '[data-testid="idle-status-text"]') return idleVisible ? idleBadge : null;
+      return null;
+    },
+    querySelectorAll: () => []
+  };
+  p.document.querySelector = sel => (sel === '[data-testid="idle-status-text"]' && idleVisible) ? idleBadge : null;
+  p.document.querySelectorAll = sel => sel === '[data-testid="agent-response"]' ? [response] : [];
+  p.context.HU = m => m?.index;
+  p.context.React = { createElement: (type, props, ...children) => ({ type, props: props || {}, children }) };
+  p.context.ReactDOM = {
+    createRoot(mount) {
+      return {
+        render() {},
+        unmount() { mount.isConnected = false; }
+      };
+    }
+  };
+  p.context.__agyNativeAdapter.wrap = el => el;
+  p.context.__agyNativeAdapter.installPage = () => true;
+  p.context.__agyNativeAdapter.fiber = () => ({ memoizedProps: { container: { steps: [{ step: { case: 'userInput' }, metadata: { index: 0 } }] } }, return: null });
+  let capturedEnv = null;
+  p.context.__agyPanels = env => {
+    capturedEnv = env;
+    return { Page: () => null, Sidebar: () => null, dispose() {} };
+  };
+  const turnState = {
+    conversationId: 'conv-idle-bar',
+    turns: [{ turnNumber: 1, stepIndexStart: 0, stepIndexEnd: 4, status: 'complete', completedAtIso: '2026-11-25T04:00:00Z', durationMs: 42000, toolCalls: [] }],
+    requests: []
+  };
+  p.context.__agyPowertoolsHost = raw => {
+    const req = JSON.parse(raw);
+    queueMicrotask(() => {
+      if (req.method === 'settings.get') p.context.__agyPowertoolsReceive(req.id, { enabled: true, timing: true, responseBranch: true, codexStyle: true, language: 'zh-CN' });
+      else if (req.method === 'state') p.context.__agyPowertoolsReceive(req.id, turnState);
+      else p.context.__agyPowertoolsReceive(req.id, {});
+    });
+  };
+  p.context.__agyInitialSettings = { enabled: true, timing: true, responseBranch: true, codexStyle: true, language: 'zh-CN' };
+  vm.runInContext(source, p.context);
+  await new Promise(r => setTimeout(r, 30));
+
+  const css = p.nodes[0].textContent;
+  assert.ok(css.includes('[data-testid="cascade-system-message-toolbar"]:has([data-testid="idle-status-text"]) > [data-testid="idle-status-text"] ~ div'));
+  assert.ok(css.includes('[data-turn-content="latest"]:has([data-testid="agent-loading"]) > fieldset:has([data-testid="cascade-system-message-toolbar"])'));
+  // While idle-status-text is present, neither ResponseActions nor Completion mounts prematurely
+  assert.equal(feedbackParent.children.length, 0);
+  assert.equal(response.children.length, 0);
+
+  // Once subagents finish and idle-status-text is removed, next refresh mounts both cleanly
+  idleVisible = false;
+  await capturedEnv.change({ timing: true });
+  assert.equal(feedbackParent.children.some(c => c.dataset?.agyPowertoolsRoot === 'response-actions'), true);
+  assert.equal(response.children.some(c => c.dataset?.agyPowertoolsRoot === 'completion'), true);
+  p.context.__agyPowertools.dispose();
+});
+
+test('codexStyle injects Codex 122x122 attachment CSS, toggles DOM attribute, and forwards option to adapter', async () => {
+  const p = page(true);
+  const mediaCalls = [];
+  p.context.React = { createElement: (type, props, ...children) => ({ type, props: props || {}, children }) };
+  p.context.ReactDOM = { createRoot: () => ({ render() {}, unmount() {} }) };
+  p.context.location.pathname = '/c/conv-media';
+  p.context.__agyNativeAdapter.wrap = el => el;
+  p.context.__agyNativeAdapter.installPage = () => true;
+  p.context.__agyNativeAdapter.setCodexComposerMedia = val => { mediaCalls.push(val); };
+  let currentSettings = { enabled: true, codexStyle: true, language: 'zh-CN' };
+  p.context.__agyInitialSettings = { ...currentSettings };
+  let capturedEnv = null;
+  p.context.__agyPanels = env => {
+    capturedEnv = env;
+    return { Page: () => null, Sidebar: () => null, dispose() {} };
+  };
+  p.context.__agyPowertoolsHost = raw => {
+    const req = JSON.parse(raw);
+    queueMicrotask(() => {
+      if (req.method === 'settings.get') p.context.__agyPowertoolsReceive(req.id, { ...currentSettings });
+      else if (req.method === 'settings.set') {
+        currentSettings = { ...currentSettings, ...req.settings };
+        p.context.__agyPowertoolsReceive(req.id, { ...currentSettings });
+      } else p.context.__agyPowertoolsReceive(req.id, {});
+    });
+  };
+  vm.runInContext(source, p.context);
+  await new Promise(r => setTimeout(r, 30));
+
+  const css = p.nodes[0].textContent;
+  assert.equal(p.document.documentElement.hasAttribute('data-agy-codex-composer-media'), true);
+  assert.ok(mediaCalls.includes(true));
+  assert.ok(css.includes('html[data-agy-codex-composer-media] .surface-composer-card [data-testid="input-attachment"]:has(img) [data-testid="input-attachment-open"]{display:block;width:122px;height:122px;border-radius:12px'));
+  assert.ok(css.includes('[data-testid="side-question-tab-composer"] .surface-composer-card [data-testid="input-attachment"]:has(img) [data-testid="input-attachment-open"]{width:88px;height:88px;border-radius:10px}'));
+  assert.ok(css.includes('[data-testid="input-attachment-remove"]::before{content:\'\';position:absolute;inset:-6px}'));
+
+  await capturedEnv.change({ codexStyle: false });
+  assert.equal(p.document.documentElement.hasAttribute('data-agy-codex-composer-media'), false);
+  assert.equal(mediaCalls.at(-1), false);
+
+  await capturedEnv.change({ codexStyle: true });
+  assert.equal(p.document.documentElement.hasAttribute('data-agy-codex-composer-media'), true);
+  p.context.__agyPowertools.dispose();
+  assert.equal(p.document.documentElement.hasAttribute('data-agy-codex-composer-media'), false);
+});
+
+test('contextmenu unifies selection, images, and files to CodexActionPill when codexStyle is on, and falls back to FileContextMenu when off', async () => {
+  const p = page(true);
+  p.document.body.appendChild = child => { child.isConnected = true; };
+  const renderedMenus = [];
+  const rpcCalls = [];
+  const attachCalls = [];
+  const selectionCalls = [];
+  let capturedEnv = null;
+  p.context.React = {
+    createElement: (type, props, ...children) => ({ type, props: props || {}, children }),
+    Fragment: 'fragment',
+    useState: init => [typeof init === 'function' ? init() : init, () => {}],
+    useEffect: fn => { fn(); },
+    useLayoutEffect: fn => { fn(); },
+    useRef: init => ({ current: init })
+  };
+  p.context.ReactDOM = {
+    createRoot(mount) {
+      return {
+        render(tree) { if (mount.dataset?.agyPowertoolsRoot === 'file-menu') renderedMenus.push(tree); },
+        unmount() { mount.isConnected = false; }
+      };
+    }
+  };
+  p.context.HC = ({ children }) => ({ type: 'HC', props: {}, children });
+  p.context.IC = ({ children }) => ({ type: 'IC', props: {}, children });
+  p.context.JC = ({ children, ...props }) => ({ type: 'JC', props, children });
+  p.context.KC = ({ children }) => ({ type: 'KC', props: {}, children });
+  p.context.GC = ({ children, ...props }) => ({ type: 'GC', props, children });
+  p.context.dq = props => ({ type: 'dq', props, children: [] });
+  p.context.window = { addEventListener() {}, removeEventListener() {}, innerWidth: 1280, innerHeight: 800 };
+  let currentSettings = { enabled: true, codexStyle: true, fileContextMenu: true, language: 'zh-CN' };
+  p.context.__agyInitialSettings = { ...currentSettings };
+  p.context.__agyNativeAdapter.wrap = el => el;
+  p.context.__agyNativeAdapter.installPage = () => true;
+  p.context.__agyPanels = env => { capturedEnv = env; return { Page: () => null, Sidebar: () => null, dispose() {} }; };
+  let currentSelection = null;
+  let currentResolved = null;
+  const fakeInlineMedia = { mode: 'media', bytes: new Uint8Array([1, 2, 3]), mimeType: 'image/png', name: 'paste.png' };
+  p.context.__agyNativeAdapter.extractQuotableSelection = () => currentSelection;
+  p.context.__agyNativeAdapter.attachSelectionToComposer = async (snap, opts) => {
+    selectionCalls.push({ snap, opts });
+    return { ok: true };
+  };
+  p.context.__agyNativeAdapter.resolveContextTarget = () => currentResolved;
+  p.context.__agyNativeAdapter.resolveInlineMediaPayload = async () => fakeInlineMedia;
+  p.context.__agyNativeAdapter.attachFileToComposer = async (payload, src, opts) => {
+    attachCalls.push({ payload, src, opts });
+    return { ok: true };
+  };
+  p.context.__agyPowertoolsHost = raw => {
+    const req = JSON.parse(raw);
+    rpcCalls.push(req);
+    queueMicrotask(() => {
+      if (req.method === 'settings.get') p.context.__agyPowertoolsReceive(req.id, { ...currentSettings });
+      else if (req.method === 'settings.set') {
+        currentSettings = { ...currentSettings, ...req.settings };
+        p.context.__agyPowertoolsReceive(req.id, { ...currentSettings });
+      } else if (req.method === 'file.openWithList') p.context.__agyPowertoolsReceive(req.id, { ok: true, apps: [] });
+      else if (req.method === 'file.attach') p.context.__agyPowertoolsReceive(req.id, { ok: true, mode: 'mention', uri: req.uri, isDirectory: req.isDirectory });
+      else p.context.__agyPowertoolsReceive(req.id, {});
+    });
+  };
+  vm.runInContext(source, p.context);
+  await new Promise(r => setTimeout(r, 20));
+
+  const expandTree = node => {
+    if (!node || typeof node !== 'object') return node;
+    if (Array.isArray(node)) return node.map(expandTree);
+    if (typeof node.type === 'function') return expandTree(node.type({ ...node.props, children: node.children }));
+    return { ...node, children: (Array.isArray(node.children) ? node.children : [node.children]).map(expandTree) };
+  };
+  const findById = (node, id) => {
+    if (!node || typeof node !== 'object') return null;
+    if (Array.isArray(node)) { for (const x of node) { const r = findById(x, id); if (r) return r; } return null; }
+    if (node.props?.['data-testid'] === id) return node;
+    return findById(node.children, id);
+  };
+  const css = p.nodes[0].textContent;
+  assert.ok(css.includes('html[data-agy-codex-style] .selection-popup > .agy-selection-pill'));
+  assert.ok(css.includes('html[data-agy-context-pill-open] .selection-popup{opacity:0!important;pointer-events:none!important}'));
+  assert.ok(css.includes('.agy-codex-action-pill{'));
+
+  const ctxListener = p.callbacks.get('contextmenu').at(-1);
+  assert.ok(ctxListener);
+
+  // 1. Selected text right-click -> shows CodexActionPill ("添加到对话 | 在侧边聊天中提问") and marks data-agy-context-pill-open
+  const textTarget = { closest: () => null };
+  currentSelection = { text: '333.3335 m', source: textTarget, isCodeBlock: false, inSideQuestion: false, anchorRect: { top: 200, bottom: 220 } };
+  let prevented = false, stopped = false;
+  ctxListener({ clientX: 250, clientY: 210, target: textTarget, preventDefault() { prevented = true; }, stopPropagation() { stopped = true; } });
+  await new Promise(r => setTimeout(r, 10));
+  assert.equal(prevented, true);
+  assert.equal(stopped, true);
+  assert.equal(p.document.documentElement.hasAttribute('data-agy-context-pill-open'), true);
+  const selMenu = expandTree(renderedMenus.at(-1));
+  const selPill = findById(selMenu, 'agy-codex-context-pill');
+  assert.ok(selPill);
+  assert.equal(selPill.props['data-pill-mode'], 'selection');
+  assert.equal(findById(selMenu, 'agy-file-attach-chat').children[0], '添加到对话');
+  assert.equal(findById(selMenu, 'agy-file-attach-side-question').children[0], '在侧边聊天中提问');
+  await findById(selMenu, 'agy-file-attach-side-question').props.onClick();
+  assert.equal(selectionCalls.at(-1).opts.target, 'side');
+  assert.equal(p.document.documentElement.hasAttribute('data-agy-context-pill-open'), false);
+
+  // 2. Inline image right-click when codexStyle is on -> shows CodexActionPill (overrides FileContextMenu)
+  currentSelection = null;
+  const imgSource = { closest: () => null };
+  currentResolved = { kind: 'inline-media', uri: '', isDirectory: false, isMedia: true, inlineTarget: { name: 'paste.png' }, source: imgSource };
+  ctxListener({ clientX: 120, clientY: 160, target: imgSource, preventDefault() {}, stopPropagation() {} });
+  await new Promise(r => setTimeout(r, 10));
+  assert.equal(rpcCalls.some(r => r.method === 'file.openWithList'), false);
+  const imgPillTree = expandTree(renderedMenus.at(-1));
+  assert.equal(findById(imgPillTree, 'agy-codex-context-pill').props['data-pill-mode'], 'file');
+  await findById(imgPillTree, 'agy-file-attach-side-question').props.onClick();
+  await new Promise(r => setTimeout(r, 10));
+  assert.equal(attachCalls.at(-1).opts.target, 'side');
+  assert.equal(attachCalls.at(-1).payload.mode, 'media');
+
+  // 3. Directory pill inside Side Question -> hides second button to match Codex
+  const dirInSideSource = { closest: sel => sel === '[data-testid="side-question-tab-content"]' ? {} : null };
+  currentResolved = { kind: 'file', uri: 'file:///Users/test/repo', isDirectory: true, source: dirInSideSource };
+  ctxListener({ clientX: 200, clientY: 220, target: dirInSideSource, preventDefault() {}, stopPropagation() {} });
+  await new Promise(r => setTimeout(r, 10));
+  const sidePillTree = expandTree(renderedMenus.at(-1));
+  assert.ok(findById(sidePillTree, 'agy-file-attach-chat'));
+  assert.equal(findById(sidePillTree, 'agy-file-attach-side-question'), null);
+  await findById(sidePillTree, 'agy-file-attach-chat').props.onClick();
+  await new Promise(r => setTimeout(r, 10));
+  assert.equal(attachCalls.at(-1).opts.target, 'side');
+
+  // 4. Disabling codexStyle falls back to vertical FileContextMenu with fixed chat_bubble icon
+  await capturedEnv.change({ codexStyle: false });
+  const dirMainSource = { closest: () => null };
+  currentResolved = { kind: 'file', uri: 'file:///Users/test/repo', isDirectory: true, source: dirMainSource };
+  ctxListener({ clientX: 200, clientY: 220, target: dirMainSource, preventDefault() {}, stopPropagation() {} });
+  await new Promise(r => setTimeout(r, 10));
+  const fallbackMenu = expandTree(renderedMenus.at(-1));
+  assert.ok(findById(fallbackMenu, 'agy-file-context-menu'));
+  assert.ok(findById(fallbackMenu, 'agy-file-open-with'));
+  assert.equal(findById(fallbackMenu, 'agy-file-attach-side-question').props.icon.props.name, 'chat_bubble');
+
+  await new Promise(r => setTimeout(r, 20));
+  p.context.__agyPowertools.dispose();
+  await new Promise(r => setTimeout(r, 10));
 });

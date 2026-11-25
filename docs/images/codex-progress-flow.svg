@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="500" viewBox="0 0 1200 500">
+  <defs>
+    <style>
+      .font { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif; }
+      .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    </style>
+  </defs>
+  <rect width="1200" height="500" rx="16" fill="#101113"/>
+
+  <!-- Left Card: Streaming Active Phase -->
+  <g transform="translate(24,24)">
+    <rect width="564" height="452" rx="14" fill="#181818" stroke="#383838"/>
+    <rect x="24" y="20" width="176" height="26" rx="13" fill="#173E76"/>
+    <text x="112" y="37" text-anchor="middle" class="font" font-size="12" font-weight="600" fill="#F6FAFE">执行态：流式直接展开</text>
+    <text x="540" y="37" text-anchor="end" class="font" font-size="11.5" fill="#A5A5A5">取消 320px 限高滚动盒</text>
+
+    <!-- Bright Stage Report 1 -->
+    <text x="28" y="84" class="font" font-size="14" fill="#FFFFFF">正在核查划词浮窗结构与右键注入入口，定位到目标挂载</text>
+    <text x="28" y="106" class="font" font-size="14" fill="#FFFFFF">位置后会一并替换为横向胶囊。</text>
+
+    <!-- Single-line muted tool rows (flush left) -->
+    <text x="28" y="142" class="font" font-size="13.5" fill="#A5A5A5">已探索 3 个文件，运行了搜索命令  ›</text>
+    <text x="28" y="172" class="font" font-size="13.5" fill="#A5A5A5">正在读取 native-ui.js，native-client.js  ›</text>
+
+    <!-- Bright Stage Report 2 -->
+    <text x="28" y="212" class="font" font-size="14" fill="#FFFFFF">已确认原版与 Codex 胶囊节点差异，正在同步修改弹窗</text>
+    <text x="28" y="234" class="font" font-size="14" fill="#FFFFFF">样式与词表并执行全量单元测试。</text>
+
+    <!-- Single-line terminal command -->
+    <text x="28" y="270" class="font" font-size="13.5" fill="#A5A5A5">运行了命令 npm test  ›</text>
+
+    <!-- Subagent progress cleanly inline while active -->
+    <rect x="28" y="294" width="508" height="72" rx="10" fill="#212121" stroke="#323232"/>
+    <text x="44" y="320" class="font" font-size="13" fill="#E5E7EB">已启动 2 个子智能体  ⌄</text>
+    <text x="58" y="346" class="font" font-size="12.5" fill="#A5A5A5">✓ 原生划词机制研究员    ✓ Codex 胶囊源码考据员</text>
+
+    <!-- Working footer (no premature like/copy toolbar) -->
+    <circle cx="35" cy="408" r="4" fill="#3A83F7"/>
+    <text x="48" y="413" class="font" font-size="13" fill="#A5A5A5">工作中…</text>
+  </g>
+
+  <!-- Right Card: Completed Collapsed Phase -->
+  <g transform="translate(612,24)">
+    <rect width="564" height="452" rx="14" fill="#181818" stroke="#383838"/>
+    <rect x="24" y="20" width="192" height="26" rx="13" fill="#1F3A2E"/>
+    <text x="120" y="37" text-anchor="middle" class="font" font-size="12" font-weight="600" fill="#86EFAC">完成态：自动收拢整轮过程</text>
+    <text x="540" y="37" text-anchor="end" class="font" font-size="11.5" fill="#A5A5A5">隐藏系统消息不留空箭头</text>
+
+    <!-- Single collapsed worked-for row without update count suffix -->
+    <text x="28" y="86" class="font" font-size="14" fill="#A5A5A5">用时 49秒  ›</text>
+
+    <!-- Clean final answer immediately below -->
+    <text x="28" y="130" class="font" font-size="14" font-weight="600" fill="#FFFFFF">已完成横向分段胶囊与进度流统一，本地覆盖安装成功。</text>
+    <text x="28" y="164" class="font" font-size="14" fill="#E5E7EB">1. 划词、选中右键与文件/图片右键均已对齐 Codex 胶囊样式。</text>
+    <text x="28" y="194" class="font" font-size="14" fill="#E5E7EB">2. 日常工作与软件开发模式共用同一套实时阶段流。</text>
+    <text x="28" y="224" class="font" font-size="14" fill="#E5E7EB">3. 全量 183 项单测通过，按 Cmd + Q 重启客户端生效。</text>
+
+    <!-- Action toolbar appears cleanly after turn finishes -->
+    <g transform="translate(28,256)">
+      <rect x="0" y="0" width="24" height="24" rx="6" fill="#252525"/>
+      <text x="12" y="16" text-anchor="middle" class="font" font-size="11" fill="#A5A5A5">❐</text>
+      <rect x="30" y="0" width="24" height="24" rx="6" fill="#252525"/>
+      <text x="42" y="16" text-anchor="middle" class="font" font-size="11" fill="#A5A5A5">↑</text>
+      <rect x="60" y="0" width="24" height="24" rx="6" fill="#252525"/>
+      <text x="72" y="16" text-anchor="middle" class="font" font-size="11" fill="#A5A5A5">↓</text>
+      <rect x="90" y="0" width="76" height="24" rx="6" fill="#252525"/>
+      <text x="128" y="16" text-anchor="middle" class="font" font-size="11" fill="#A5A5A5">分支会话</text>
+      <text x="180" y="16" class="font" font-size="12" fill="#737373">刚刚</text>
+    </g>
+
+    <!-- Summary Note Box -->
+    <rect x="28" y="324" width="508" height="96" rx="10" fill="#212121" stroke="#303030"/>
+    <text x="46" y="352" class="font" font-size="13" font-weight="600" fill="#FFFFFF">核心体验改进</text>
+    <text x="46" y="378" class="font" font-size="12.5" fill="#A5A5A5">执行中不刷屏覆盖、不提前误显结束按钮；完成后把零碎工具与阶段</text>
+    <text x="46" y="399" class="font" font-size="12.5" fill="#A5A5A5">全部折叠进顶部「用时」，待审批步骤自动保留内联不收起。</text>
+  </g>
+</svg>

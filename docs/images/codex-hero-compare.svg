@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="640" viewBox="0 0 1200 640">
+  <defs>
+    <style>
+      .font { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif; }
+      .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    </style>
+  </defs>
+  <rect width="1200" height="640" rx="16" fill="#101113"/>
+
+  <!-- Left: Original Upstream Style -->
+  <g transform="translate(24,24)">
+    <rect width="564" height="592" rx="14" fill="#1B1C1E" stroke="#303238"/>
+    <rect x="20" y="18" width="118" height="26" rx="13" fill="#2C2F34"/>
+    <text x="79" y="35" text-anchor="middle" class="font" font-size="12" font-weight="600" fill="#9CA3AF">原版默认风格</text>
+
+    <!-- User Bubble -->
+    <rect x="228" y="64" width="308" height="44" rx="14" fill="#242629" stroke="#383B42"/>
+    <text x="246" y="91" class="font" font-size="13.5" fill="#E5E7EB">帮我对比排版配置并列出变更文件</text>
+
+    <!-- Dense response indented + tight line-height -->
+    <text x="36" y="140" class="font" font-size="13.5" fill="#D1D5DB">已更新对应配置项，请查看下方清单：</text>
+    <text x="36" y="164" class="font" font-size="13.5" fill="#D1D5DB">主要修改了</text>
+    <rect x="108" y="149" width="92" height="20" rx="4" fill="#26292E" stroke="#454952"/>
+    <text x="154" y="163" text-anchor="middle" class="mono" font-size="11.5" fill="#E5E7EB">native-ui.js</text>
+    <text x="208" y="164" class="font" font-size="13.5" fill="#D1D5DB">和</text>
+    <text x="228" y="164" class="font" font-size="13.5" fill="#93C5FD" text-decoration="underline">设置面板</text>
+
+    <!-- Boxed Table -->
+    <g transform="translate(36,188)">
+      <rect width="492" height="148" rx="8" fill="#212327" stroke="#383B42"/>
+      <line x1="0" y1="36" x2="492" y2="36" stroke="#383B42"/>
+      <line x1="0" y1="74" x2="492" y2="74" stroke="#30333A"/>
+      <line x1="0" y1="111" x2="492" y2="111" stroke="#30333A"/>
+      <line x1="150" y1="0" x2="150" y2="148" stroke="#30333A"/>
+      <line x1="330" y1="0" x2="330" y2="148" stroke="#30333A"/>
+      <text x="14" y="23" class="font" font-size="12" font-weight="600" fill="#D1D5DB">项目</text>
+      <text x="164" y="23" class="font" font-size="12" font-weight="600" fill="#D1D5DB">原版参数</text>
+      <text x="344" y="23" class="font" font-size="12" font-weight="600" fill="#D1D5DB">显示特点</text>
+      <text x="14" y="59" class="font" font-size="12.5" fill="#E5E7EB">画布与气泡</text>
+      <text x="164" y="59" class="mono" font-size="12" fill="#9CA3AF">#1B1C1E / 灰底</text>
+      <text x="344" y="59" class="font" font-size="12.5" fill="#9CA3AF">带边框中性卡片</text>
+      <text x="14" y="96" class="font" font-size="12.5" fill="#E5E7EB">行高与段距</text>
+      <text x="164" y="96" class="mono" font-size="12" fill="#9CA3AF">1.4 / 8px</text>
+      <text x="344" y="96" class="font" font-size="12.5" fill="#9CA3AF">紧凑堆叠偏密</text>
+      <text x="14" y="133" class="font" font-size="12.5" fill="#E5E7EB">表格样式</text>
+      <text x="164" y="133" class="font" font-size="12.5" fill="#9CA3AF">全框格线</text>
+      <text x="344" y="133" class="font" font-size="12.5" fill="#9CA3AF">外框线条感较重</text>
+    </g>
+
+    <!-- Bottom Composer Preview -->
+    <rect x="28" y="486" width="508" height="80" rx="14" fill="#242629" stroke="#383B42"/>
+    <text x="48" y="518" class="font" font-size="13" fill="#6B7280">输入消息，@ 引用，/ 选择操作</text>
+    <rect x="466" y="528" width="54" height="26" rx="13" fill="#3B82F6"/>
+    <text x="493" y="545" text-anchor="middle" class="font" font-size="12" font-weight="600" fill="#FFFFFF">发送</text>
+  </g>
+
+  <!-- Right: Codex Style Experience -->
+  <g transform="translate(612,24)">
+    <rect width="564" height="592" rx="14" fill="#181818" stroke="#383838"/>
+    <!-- 48rem column guide lines -->
+    <line x1="28" y1="54" x2="28" y2="568" stroke="rgba(255,255,255,0.08)" stroke-dasharray="3,4"/>
+    <line x1="536" y1="54" x2="536" y2="568" stroke="rgba(255,255,255,0.08)" stroke-dasharray="3,4"/>
+
+    <rect x="28" y="18" width="150" height="26" rx="13" fill="#173E76"/>
+    <text x="103" y="35" text-anchor="middle" class="font" font-size="12" font-weight="600" fill="#F6FAFE">Codex 风格体验</text>
+    <text x="536" y="35" text-anchor="end" class="mono" font-size="11.5" fill="#A5A5A5">48rem 严格齐边</text>
+
+    <!-- Codex Borderless Blue User Bubble -->
+    <rect x="220" y="64" width="316" height="44" rx="22" fill="#173E76"/>
+    <text x="240" y="91" class="font" font-size="14" fill="#F6FAFE">帮我对比排版配置并列出变更文件</text>
+
+    <!-- Codex airy response flush-aligned with left rail -->
+    <text x="28" y="142" class="font" font-size="14" fill="#FFFFFF">已对齐 Codex 桌面端排版尺度与配色方案，核心效果如下：</text>
+    <text x="28" y="172" class="font" font-size="14" fill="#FFFFFF">主要生效于</text>
+    <rect x="104" y="155" width="96" height="22" rx="6" fill="rgba(255,255,255,0.11)"/>
+    <text x="152" y="170" text-anchor="middle" class="mono" font-size="12" fill="#FFFFFF">native-ui.js</text>
+    <text x="208" y="172" class="font" font-size="14" fill="#FFFFFF">与</text>
+    <text x="228" y="172" class="font" font-size="14" fill="#80B9FA">设置面板配置</text>
+    <line x1="228" y1="176" x2="314" y2="176" stroke="#80B9FA" stroke-width="1" stroke-dasharray="2,2"/>
+
+    <!-- Codex Borderless Horizontal-Rule Table -->
+    <g transform="translate(28,198)">
+      <line x1="0" y1="36" x2="508" y2="36" stroke="rgba(255,255,255,0.16)"/>
+      <line x1="0" y1="78" x2="508" y2="78" stroke="rgba(255,255,255,0.06)"/>
+      <line x1="0" y1="120" x2="508" y2="120" stroke="rgba(255,255,255,0.06)"/>
+      <text x="0" y="23" class="font" font-size="12.5" font-weight="600" fill="#FFFFFF">项目</text>
+      <text x="156" y="23" class="font" font-size="12.5" font-weight="600" fill="#FFFFFF">Codex 参数</text>
+      <text x="332" y="23" class="font" font-size="12.5" font-weight="600" fill="#FFFFFF">实际观感</text>
+      <text x="0" y="62" class="font" font-size="13" fill="#FFFFFF">画布与气泡</text>
+      <text x="156" y="62" class="mono" font-size="12" fill="#A5A5A5">#181818 / #173E76</text>
+      <text x="332" y="62" class="font" font-size="13" fill="#F6FAFE">无边框深蓝提问气泡</text>
+      <text x="0" y="104" class="font" font-size="13" fill="#FFFFFF">行高与段距</text>
+      <text x="156" y="104" class="mono" font-size="12" fill="#A5A5A5">1.625 / 14px</text>
+      <text x="332" y="104" class="font" font-size="13" fill="#F6FAFE">疏朗通透易于长读</text>
+      <text x="0" y="146" class="font" font-size="13" fill="#FFFFFF">表格与方牌</text>
+      <text x="156" y="146" class="font" font-size="13" fill="#A5A5A5">无框横线 / 半透明</text>
+      <text x="332" y="146" class="font" font-size="13" fill="#63A8F8">轻量去边框 + 虚线链接</text>
+    </g>
+
+    <!-- Blockquote sample -->
+    <rect x="28" y="382" width="4" height="44" rx="2" fill="rgba(255,255,255,0.16)"/>
+    <text x="48" y="400" class="font" font-size="13" fill="#A5A5A5">若本机已安装 Codex 桌面端，会自动同步其主题色与字号；</text>
+    <text x="48" y="420" class="font" font-size="13" fill="#A5A5A5">未安装则零配置生效内置预设，也可随时自定义气泡着色。</text>
+
+    <!-- Bottom Composer flush with 48rem rails -->
+    <rect x="28" y="486" width="508" height="80" rx="16" fill="#212121" stroke="#383838"/>
+    <text x="48" y="518" class="font" font-size="13.5" fill="#A5A5A5">输入消息，@ 引用，/ 选择操作</text>
+    <rect x="466" y="528" width="54" height="26" rx="13" fill="#3A83F7"/>
+    <text x="493" y="545" text-anchor="middle" class="font" font-size="12" font-weight="600" fill="#FFFFFF">发送</text>
+  </g>
+</svg>

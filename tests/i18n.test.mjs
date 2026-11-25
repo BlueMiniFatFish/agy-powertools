@@ -76,12 +76,22 @@ test('Traditional Chinese (zh-TW) uses Taiwan IT terminology, converts UI string
     assert.equal(store.get().language,'zh-TW');
   }finally{rmSync(dir,{recursive:true,force:true});}
   // Ensure no common simplified-only glyphs remain across UI source files after toZhTw
-  const simplifiedOnly=/[万与个为义于产仅从仓们价优会传体余侧关内写准减凑凭击划则刚创删务动区协单占却历压参发变号后听启周响唤围图圆场声处备头夹实审对导将尝尽层带帮并广库应开异强归当录径忆态总战执扩扬抢护报担拦择挂换据数断无旧时昵显暂机权条来栏树样档检汇没洁浅测浏滚满点热状独环现电监盘码确碍离积称稳筛签简类紧级线组细织终结给络绝统继续缓编缩网联脑范营补装观规视览触计订认让议记许设访证识诊试话询该详语误说请读调败账费资转轮软载较辅辑输边过运这进远违连迟适选遥邮采钟钥钮链销错键长闭问闲间阅队阶际险随隐静页顶项顺顿预频题额风馈驻验骤麦标彻]/;
+  const simplifiedOnly=/[万与个为义于产仅从仓们价优会传体余侧关内写准减凑凭击划则刚创删务动区协单占却历压参发变号后听启周响唤围图圆场声处备头夹实审对导将尝尽层带帮并广库应开异强归当录径忆态总战执扩扬抢护报担拦择挂换据数断无旧时昵显暂机权条来栏树样档检汇没洁浅测浏滚满点热状独环现电监盘码确碍离积称稳筛签简类紧级线组细织终结给络绝统继续缓编缩网联脑范营补装观规视览触计订认让议记许设访证识诊试话询该详语误说请读调败账费资转轮软载较辅辑输边过运这进远违连迟适选遥邮采钟钥钮链销错键长闭问闲间阅队阶际险随隐静页顶项顺顿预频题额风馈驻验骤麦标彻齐画荐纯盖气叠缀纲]/;
   for(const file of ['lib/native-i18n.js','lib/native-panels.js','lib/native-ui.js','lib/sidecar-ui.mjs']){
     const converted=toZhTw(readFileSync(file,'utf8')).replace(/简体中文|批准/g,'');
     const leftover=converted.match(simplifiedOnly);
     assert.equal(leftover,null,`Unexpected simplified glyph ${leftover?.[0]} in ${file}`);
   }
+  assert.equal(
+    toZhTw('内置默认（推荐）对齐画布底色与纯实色气泡并覆盖原设置'),
+    '內建預設（推薦）對齊畫布底色與純實色氣泡並覆蓋原設定'
+  );
+  assert.equal(
+    toZhTw('无损直传、虚线链接、收拢折叠与改气泡颜色'),
+    '無損直傳、虛線連結、收攏折疊與改氣泡顏色'
+  );
+  assert.equal(toZhTw('精简排版输出与工具摘要汉化'), '精簡排版輸出與工具摘要漢化');
+  assert.equal(toZhTw('本地化'), '本地化');
 });
 
 test('Swarm UI strings translate cleanly in zh-CN and zh-TW without middle dots and protect post bodies', () => {
@@ -160,6 +170,151 @@ test('Swarm UI strings translate cleanly in zh-CN and zh-TW without middle dots 
   assert.equal(workedUpdates.includes('\u00b7'), false);
   assert.equal(t(`Worked for 8m 28s \u00b7 4 updates`, 'zh-TW'), '用時 8分28秒 4 條進度');
   assert.equal(t(`\u00b7 3 updates`, 'zh-CN'), '3 条进度');
+  assert.equal(t('Running command', 'zh-CN'), '正在运行命令');
+  assert.equal(t('Running command', 'zh-TW'), '正在執行命令');
+  assert.equal(t('Waiting for your approval', 'zh-TW'), '等待你的確認');
+  assert.equal(t('Ran command', 'zh-CN'), '运行了命令');
+  assert.equal(t('Explored files, ran command', 'zh-CN'), '已探索文件，运行了命令');
+  assert.equal(t('Explored files, ran command', 'zh-TW'), '已探索檔案，執行了命令');
+  assert.equal(t('Explored 3 files, ran commands, edited 2 files', 'zh-CN'), '已探索 3 个文件，运行了命令，编辑了 2 个文件');
+  assert.equal(t('Edited artifact', 'zh-TW'), '編輯了產物');
+  assert.equal(t('6/6 steps', 'zh-CN'), '6/6 步');
+  const planChipMixed = t(`2/6 steps \u00b7 1 failed \u00b7 1 skipped`, 'zh-CN');
+  assert.equal(planChipMixed, '2/6 步 1 失败 1 已跳过');
+  assert.equal(planChipMixed.includes('\u00b7'), false);
+  assert.equal(t('Analyzed', 'zh-CN'), '已分析');
+  assert.equal(t('Analyzing', 'zh-CN'), '正在分析');
+  assert.equal(t('Editing', 'zh-CN'), '正在编辑');
+  assert.equal(t('Editing', 'zh-TW'), '正在編輯');
+  assert.equal(t('Reading', 'zh-CN'), '正在读取');
+  assert.equal(t('Reading', 'zh-TW'), '正在讀取');
+  assert.equal(t('Executed', 'zh-CN'), '已执行');
+  assert.equal(t('Executed', 'zh-TW'), '已執行');
+  assert.equal(t('Created outline', 'zh-CN'), '已生成大纲');
+  assert.equal(t('Created outline', 'zh-TW'), '已生成大綱');
+  assert.equal(t('Rejected', 'zh-CN'), '已拒绝');
+  assert.equal(t('Rejected', 'zh-TW'), '已拒絕');
+  assert.equal(t('Syntax check and full test run finished', 'zh-CN'), '已完成：Syntax check and full test run');
+  assert.equal(t('Goal Verification', 'zh-CN'), '目标核验');
+  assert.equal(t('Goal Verification', 'zh-TW'), '目標核驗');
+  assert.equal(t('Fork Environment Notice', 'zh-CN'), '分支环境提示');
+  assert.equal(t('Fork Environment Notice', 'zh-TW'), '分支環境提示');
+  assert.equal(t('System Message', 'zh-CN'), '系统消息');
+  assert.equal(t('System Message', 'zh-TW'), '系統訊息');
+  assert.equal(t('just now', 'zh-CN'), '刚刚');
+  assert.equal(t('just now', 'zh-TW'), '剛剛');
+  assert.equal(t('Compacting', 'zh-CN'), '正在压缩上下文');
+  assert.equal(t('Compacting', 'zh-TW'), '正在壓縮上下文');
+  assert.equal(t('Reading native-ui.js', 'zh-CN'), '正在读取 native-ui.js');
+  assert.equal(t('Reading native-ui.js', 'zh-TW'), '正在讀取 native-ui.js');
+  assert.equal(t('Editing settings.mjs', 'zh-CN'), '正在编辑 settings.mjs');
+  assert.equal(t('Editing settings.mjs', 'zh-TW'), '正在編輯 settings.mjs');
+  assert.equal(t('Listing lib', 'zh-CN'), '正在列出 lib');
+  assert.equal(t('Searching codexProgress', 'zh-CN'), '正在搜索 codexProgress');
+  assert.equal(t('Running npm test', 'zh-CN'), '正在运行 npm test');
+  assert.equal(t('Running npm test', 'zh-TW'), '正在執行 npm test');
+  assert.equal(t('Waiting for approval to grant administrator access', 'zh-CN'), '等待授权管理员权限');
+  assert.equal(t('Waiting for approval to grant administrator access', 'zh-TW'), '等待授權管理員權限');
+  assert.equal(t('Waiting for approval to read: /etc/hosts', 'zh-CN'), '等待授权读取：/etc/hosts');
+  assert.equal(t('Opened URL in Browser', 'zh-CN'), '已在浏览器中打开网址');
+  assert.equal(t('Opened URL in Browser', 'zh-TW'), '已在瀏覽器中開啟網址');
+  assert.equal(t('Took Screenshot', 'zh-CN'), '已截图');
+  assert.equal(t('Took Screenshot', 'zh-TW'), '已截圖');
+  assert.equal(t('Inspected commit', 'zh-CN'), '已查看提交');
+  assert.equal(t('Running command', 'zh-CN'), '正在运行命令');
+  assert.equal(t('Editing files', 'zh-CN'), '正在编辑文件');
+  assert.equal(t('Thinking for 2s', 'zh-CN'), '正在思考 2 秒');
+  assert.equal(t('Thinking for 2s', 'zh-TW'), '正在思考 2 秒');
+  assert.equal(t('Started 2 subagents', 'zh-CN'), '已启动 2 个子智能体');
+  assert.equal(t('Starting 2 subagents', 'zh-TW'), '正在啟動 2 個子智慧體'.replace('智慧', '智能'));
+  assert.equal(t('Message from 插件覆盖优先级审计员 (research)', 'zh-CN'), '来自 插件覆盖优先级审计员 (research) 的消息');
+  assert.equal(t('Listing tasks', 'zh-CN'), '正在列出任务');
+  assert.equal(t('Reading terminal:', 'zh-CN'), '正在读取终端：');
+  assert.equal(t('Worked for 1d 2h 3m', 'zh-CN'), '用时 1天2小时3分');
+  assert.equal(t('Waiting for subagent', 'zh-CN'), '正在等待子智能体');
+  const browserThink = t(`Using browser \u00b7 Thinking (5s)\u2026`, 'zh-CN');
+  assert.equal(browserThink, '正在使用浏览器 正在思考 (5 秒)…');
+  assert.equal(browserThink.includes('\u00b7'), false);
+  const subStatus = t(`2 subagents running, 1 blocked \u00b7 1m 30s left`, 'zh-CN');
+  assert.equal(subStatus, '2 个子智能体运行中，1 项已阻塞 剩余 1分30秒');
+  assert.equal(subStatus.includes('\u00b7'), false);
+  assert.equal(t('Task Notification', 'zh-CN'), '任务通知');
+  assert.equal(t('Agent Message', 'zh-TW'), '智能體訊息');
+  assert.equal(t('Pinned Conversations', 'zh-CN'), '置顶会话');
+  assert.equal(t('Pinned Conversations', 'zh-TW'), '置頂會話');
+  assert.equal(t('Save Image', 'zh-CN'), '保存图片');
+  assert.equal(t('Save Image', 'zh-TW'), '儲存圖片');
+  assert.equal(t('Save Image As…', 'zh-CN'), '图片另存为…');
+  assert.equal(t('Save Image As…', 'zh-TW'), '圖片另存為…');
+  assert.equal(t('Attach to current chat', 'zh-CN'), '引用到当前对话');
+  assert.equal(t('Attach to current chat', 'zh-TW'), '引用到目前對話');
+  assert.equal(t('Ask in Side Question', 'zh-CN'), '引用到侧边对话');
+  assert.equal(t('Ask in Side Question', 'zh-TW'), '引用到側邊對話');
+  assert.equal(t('Failed to attach to Side Question', 'zh-CN'), '引用到侧边对话失败');
+  assert.equal(t('Failed to attach to Side Question', 'zh-TW'), '引用到側邊對話失敗');
+  assert.equal(t('Image copied', 'zh-CN'), '已复制图片');
+  assert.equal(t('Image copied', 'zh-TW'), '已複製圖片');
+  assert.equal(t('Failed to copy image', 'zh-CN'), '复制图片失败');
+  assert.equal(t('Failed to copy image', 'zh-TW'), '複製圖片失敗');
+  assert.equal(toZhTw('撑高输入框贴图匹配缩略图'), '撐高輸入框貼圖匹配縮略圖');
+  // React split text node ("2" + " subagents") translates cleanly
+  const splitNum = { nodeType: 3, nodeValue: '2' };
+  const splitSuffix = {
+    nodeType: 3,
+    nodeValue: ' subagents',
+    previousSibling: splitNum,
+    isConnected: true,
+    parentElement: { closest: () => null }
+  };
+  let nextIdx = 0;
+  const splitDoc = {
+    nodeType: 9,
+    createTreeWalker: () => ({ nextNode: () => nextIdx++ === 0 ? splitSuffix : null }),
+    querySelectorAll: () => []
+  };
+  const splitCtx = vm.createContext({
+    document: splitDoc,
+    NodeFilter: { SHOW_TEXT: 4 },
+    MutationObserver: class { observe() {} disconnect() {} },
+    __agyInitialSettings: { enabled: true, language: 'zh-CN' }
+  });
+  vm.runInContext(readFileSync('lib/native-i18n.js', 'utf8'), splitCtx);
+  assert.equal(splitSuffix.nodeValue, ' 个子智能体');
+
+  // Selection pill buttons translate to Codex labels ("添加到对话" / "在侧边聊天中提问") only when codexStyle is active, without changing global "Side Question"
+  let codexActive = true;
+  const attrs = { hasAttribute: name => name === 'data-agy-codex-style' && codexActive };
+  const quoteText = { nodeType: 3, nodeValue: 'Quote', isConnected: true, previousSibling: null, parentElement: { closest: sel => sel.includes('selection-quote-button') ? { getAttribute: () => 'selection-quote-button', closest: () => null } : null } };
+  const sideBtnText = { nodeType: 3, nodeValue: 'Side Question', isConnected: true, previousSibling: null, parentElement: { closest: sel => sel.includes('selection-btw-button') ? { getAttribute: () => 'selection-btw-button', closest: () => null } : null } };
+  const headerSideText = { nodeType: 3, nodeValue: 'Side Question', isConnected: true, previousSibling: null, parentElement: { closest: () => null } };
+  const selNodes = [quoteText, sideBtnText, headerSideText];
+  let scanIdx = 0;
+  const selDoc = {
+    nodeType: 9,
+    documentElement: attrs,
+    createTreeWalker: () => ({ nextNode: () => scanIdx < selNodes.length ? selNodes[scanIdx++] : null }),
+    querySelectorAll: sel => sel === '.selection-popup' ? [{ nodeType: 1, closest: () => null, getAttribute: () => null, hasAttribute: () => false }] : []
+  };
+  const selCtx = vm.createContext({
+    document: selDoc,
+    NodeFilter: { SHOW_TEXT: 4 },
+    MutationObserver: class { observe() {} disconnect() {} },
+    __agyToZhTw: toZhTw,
+    __agyInitialSettings: { enabled: true, language: 'zh-CN' }
+  });
+  vm.runInContext(readFileSync('lib/native-i18n.js', 'utf8'), selCtx);
+  assert.equal(quoteText.nodeValue, '添加到对话');
+  assert.equal(sideBtnText.nodeValue, '在侧边聊天中提问');
+  assert.equal(headerSideText.nodeValue, '侧边对话');
+
+  // Turning off codexStyle + rescan restores standard non-Codex labels cleanly
+  codexActive = false;
+  scanIdx = 0;
+  selCtx.__agyLocalization.apply('zh-CN', false);
+  selCtx.__agyLocalization.apply('en', false);
+  assert.equal(quoteText.nodeValue, 'Quote');
+  assert.equal(sideBtnText.nodeValue, 'Side Question');
+
   const i18nSrc = readFileSync('lib/native-i18n.js', 'utf8');
   assert.ok(i18nSrc.includes('.post-body') && i18nSrc.includes('#ov-frame'));
 });

@@ -1,14 +1,15 @@
 <div align="center">
   <img src="assets/logo.svg" width="72" height="72" alt="Agy Powertools Logo" />
-  <h1>Agy Powertools</h1>
-  <p><strong>Antigravity 2.0 原生增强插件</strong></p>
-  <p>中文界面、上下文与用量统计、紧凑排版、会话分支与编辑、多账号切换、免 TUN 代理、SSH 与 WSL2 支持</p>
+  <h1>Agy Powertools (Codex 风格定制版)</h1>
+  <p><strong>高度还原 Codex 桌面端交互与视觉体验的 Antigravity 2.0 原生增强插件</strong></p>
+  <p>Codex 排版与配色对齐、流式工作进度收拢、横向右键胶囊、122×122 高清贴图与 3 MiB 原图直传、用量统计、会话分支、多账号与免 TUN 代理</p>
   <!-- plugin-badges:start -->
   <p>
-    <a href="https://github.com/WhiteBr1ck/agy-powertools/releases"><img src="https://img.shields.io/github/v/release/WhiteBr1ck/agy-powertools?label=Release&color=2563eb" height="20" alt="Release" /></a>
-    <a href="https://github.com/WhiteBr1ck/agy-powertools/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/WhiteBr1ck/agy-powertools/ci.yml?label=CI" height="20" alt="CI" /></a>
-    <a href="LICENSE"><img src="https://img.shields.io/github/license/WhiteBr1ck/agy-powertools?label=License&color=16a34a" height="20" alt="MIT License" /></a>
-    <img src="https://img.shields.io/badge/Antigravity-2.35.0-0f172a" height="20" alt="Antigravity 2.35.0" />
+    <a href="https://github.com/xiejunjie168-bot/agy-powertools/releases"><img src="https://img.shields.io/github/v/release/xiejunjie168-bot/agy-powertools?label=Release&color=2563eb" height="20" alt="Release" /></a>
+    <a href="https://github.com/WhiteBr1ck/agy-powertools/releases/tag/v2.15.5"><img src="https://img.shields.io/badge/Upstream-v2.15.5-64748b" height="20" alt="Upstream v2.15.5" /></a>
+    <a href="https://github.com/xiejunjie168-bot/agy-powertools/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/xiejunjie168-bot/agy-powertools/ci.yml?label=CI" height="20" alt="CI" /></a>
+    <a href="LICENSE"><img src="https://img.shields.io/github/license/xiejunjie168-bot/agy-powertools?label=License&color=16a34a" height="20" alt="MIT License" /></a>
+    <img src="https://img.shields.io/badge/Antigravity-2.35%2B-0f172a" height="20" alt="Antigravity 2.35+" />
     <img src="https://img.shields.io/badge/Node.js-%3E%3D22.13-339933" height="20" alt="Node.js >= 22.13" />
     <img src="https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux%20%7C%20WSL2-475569" height="20" alt="Platform" />
   </p>
@@ -18,8 +19,8 @@
     <a href="README_EN.md">English</a>
   </p>
   <p>
-    <a href="#界面预览">界面预览</a> |
-    <a href="#主要功能">主要功能</a> |
+    <a href="#codex-核心体验优化">Codex 核心优化</a> |
+    <a href="#原生能力全保留">原生增强</a> |
     <a href="#安装与卸载">安装与卸载</a> |
     <a href="#配置说明">配置说明</a> |
     <a href="#更新日志">更新日志</a>
@@ -27,14 +28,63 @@
 </div>
 
 <p align="center">
-  <img src="docs/images/hero-workspace.png" alt="Agy Powertools 使用界面" width="100%" />
+  <img src="docs/images/codex-hero-compare.svg" alt="Codex 风格对话排版前后对比" width="100%" />
 </p>
 
-> 通过本机调试接口挂载在 Antigravity 2.0 内部，只读解析本地 SQLite 和 JSONL 会话记录，不修改客户端安装文件，也不打开外部网页。
+> 基于 [`WhiteBr1ck/agy-powertools`](https://github.com/WhiteBr1ck/agy-powertools)（MIT 开源协议）增强定制，通过本机调试接口挂载在 Antigravity 2.0 内部，只读解析本地会话数据，不改动客户端安装程序，不打开外部网页。
 
 ---
 
-## 界面预览
+## Codex 核心体验优化
+
+主打**「打开即用的 Codex 桌面端手感」**，所有视觉与交互增强按五大板块协同生效：
+
+### 1. 对话排版与视觉配色
+- **Codex 视觉尺度还原**：对齐纯正深浅双色画布、`48rem` 齐边对话列宽、1.625 疏朗行高与段落留白，搭配无边框圆润提问气泡、柔和半透明行内代码方牌、虚线下划线蓝色文件链接及极简无框横线表格。
+- **开箱即用兼顾自适应**：未安装 Codex 时直接生效内置预设；本机装有 Codex 时自动静默匹配其外观与字号，且仍可随时开启「用户消息气泡着色」自定义气泡颜色。
+
+### 2. 流式工作进度与精简排版输出
+- **打通日常工作与软件开发布局**：执行期间取消狭窄的 `320px` 限高滚动盒，阶段汇报以亮前景流式展开，连续终端/文件检索收拢为单行灰字工具摘要，且未真正完成时不提前误显结束按钮。
+- **完成后一键收拢**：最终回复生成后，自动把前置阶段汇报、唤醒消息与子智能体过程折叠为干净的一行「用时 X分X秒」，无有效操作步骤不留空折叠箭头，待审批步骤保持内联可见。
+- **全局 Codex 输出与工具摘要规范**：开启「Codex 风格体验」后自动升级接管原「阶段汇报」提示词注入（不修改用户 `AGENTS.md`），引导 Agent 结论先行、精简回答篇幅、克制行内反引号并将文件链接收尾放置，同时按界面语言输出中文化工具摘要，关闭开关即无损回退原版规则。
+
+<p align="center">
+  <img src="docs/images/codex-progress-flow.svg" alt="Codex 流式工作进度与自动收拢对比" width="100%" />
+</p>
+
+### 3. 划词与文件/图片横向右键胶囊
+- **三路入口彻底统一**：无论左键划词、选中文本右键，还是右键对话里的文件、目录、产物卡片、图片与右侧文件树，均统一弹出 Codex 同款横向双按钮胶囊 **「添加到对话 | 在侧边聊天中提问」**，直接覆盖原版冗余菜单，一键带入主对话或拉起侧边草稿。
+
+### 4. 高清原图上传与大尺寸贴图预览
+- **输入框大尺寸贴图**：粘贴或附带图片时自动向上撑高输入卡片，展示 `122×122` 圆角高清预览（侧边栏 `88×88`）与悬停圆形移除按钮。
+- **突破原生画质压缩限制**：3 MiB 内原图无损直传、超限保留原始宽高自适应降质，并把极糊的 `10 KiB` 缩略图通道提升至 `160 KiB` Retina 清晰度，代码截图与设计稿纤毫毕现。
+
+<p align="center">
+  <img src="docs/images/codex-pill-media.svg" alt="Codex 横向右键胶囊与 122x122 高清大图预览" width="100%" />
+</p>
+
+### 5. 极简双开关与全量汉化补充
+- **拒绝繁琐选项**：设置首页首栏单独收拢为仅有的两个开关——**「Codex 风格体验」** 与 **「高清原图上传（≤ 3 MiB）」**，不混入原版分区，一键启停并完整可逆。
+- **补齐 2.35+ 遗漏汉化**：补全子智能体、后台任务、定时器、权限审批、置顶会话及图片右键菜单等固定词条的简/繁中文翻译。
+
+<p align="center">
+  <img src="docs/images/codex-settings-clean.svg" alt="极简双开关 Codex 增强扩展面板" width="100%" />
+</p>
+
+---
+
+## 原生能力全保留
+
+完整继承上游 `agy-powertools` 全部统计、会话与工程增强能力：
+
+- **上下文与速度统计**：输入框旁显示上下文占用圆环（含缓存复用、压缩与 Orchestrator 拆解）及实时生成速度，支持子智能体统计。
+- **本地用量与请求看板**：左侧栏 `Powertools` 页面提供 53 周用量热力图、模型分布、参考费用、请求过滤、短间隔掉缓存标红与官方参考单价查询。
+- **完整会话分支与原位编辑**：支持对包含子智能体的会话创建完整历史分支，以及原位修改已发消息并重新生成。
+- **多账号切换与免 TUN 代理（默认关闭）**：基于系统凭据库隔离多 Google 账号与 5H/周额度切换；单独为 Antigravity 注入 HTTP / SOCKS5 代理。
+- **SSH 远程、WSL2 与标题栏快捷浮窗**：无服务端依赖直读 SSH 远端会话指标、适配 Windows WSL2 后端，以及 macOS 冷启动自动重启启用插件。
+
+<details>
+<summary><strong>展开查看统计看板、多账号与代理原版功能预览</strong></summary>
 
 <table>
   <tr>
@@ -42,72 +92,20 @@
     <th width="50%">右侧任务进度与当前额度</th>
   </tr>
   <tr>
-    <td>
-      <img src="docs/images/card-composer.png" alt="上下文窗口与生成速度" width="100%" />
-      <p>在输入框旁查看上下文占用、缓存复用和实时生成速度；外框可选显示当前模型的剩余额度。</p>
-    </td>
-    <td>
-      <img src="docs/images/card-overview-panel.png" alt="右侧任务进度与当前额度" width="100%" />
-      <p>在右侧概览查看当前运行阶段、每步耗时和各模型组剩余额度，点击标题可折叠收起。</p>
-    </td>
+    <td><img src="docs/images/card-composer.png" alt="上下文窗口与生成速度" width="100%" /></td>
+    <td><img src="docs/images/card-overview-panel.png" alt="右侧任务进度与当前额度" width="100%" /></td>
   </tr>
   <tr>
-    <th>用量概览（浅色）</th>
     <th>用量概览（深色）</th>
+    <th>多账号切换与额度管理</th>
   </tr>
   <tr>
-    <td>
-      <img src="docs/images/card-dashboard-light.png" alt="用量概览浅色主题" width="100%" />
-      <p>默认按本轮周限额周期统计请求次数、Token、缓存命中率、参考费用、53 周热力图和模型健康状态。</p>
-    </td>
-    <td>
-      <img src="docs/images/card-dashboard-dark.png" alt="用量概览深色主题" width="100%" />
-      <p>随客户端切换浅色和深色主题，对比各模型的 Token 与费用占比、缓存命中率和平均速度。</p>
-    </td>
-  </tr>
-  <tr>
-    <th>请求记录与缓存异常</th>
-    <th>多账号切换与额度（默认关闭）</th>
-  </tr>
-  <tr>
-    <td>
-      <img src="docs/images/card-requests.png" alt="请求记录与缓存异常" width="100%" />
-      <p>按账号、模型、会话和状态筛选单次请求，标出短间隔内异常掉缓存的记录，排除冷启动与上下文压缩误报。</p>
-    </td>
-    <td>
-      <img src="docs/images/card-accounts.png" alt="多账号切换与额度管理" width="100%" />
-      <p>通过系统凭据管理器本地保存和切换多个 Google 账号，集中查看 5 小时和周限额。</p>
-    </td>
-  </tr>
-  <tr>
-    <th>多语言与显示设置</th>
-    <th>免 TUN 独立代理（默认关闭）</th>
-  </tr>
-  <tr>
-    <td>
-      <img src="docs/images/card-settings.png" alt="多语言与显示设置" width="100%" />
-      <p>支持简体中文、繁體中文和 English 切换，包含紧凑排版、用户消息底色和额度边框周期等选项。</p>
-    </td>
-    <td>
-      <img src="docs/images/card-proxy.png" alt="免 TUN 独立代理设置" width="100%" />
-      <p>单独为 Antigravity 配置 HTTP 或 SOCKS5 代理，内置连通性测试、强制 HTTP/1.1 与应用内检查更新。</p>
-    </td>
+    <td><img src="docs/images/card-dashboard-dark.png" alt="用量概览深色主题" width="100%" /></td>
+    <td><img src="docs/images/card-accounts.png" alt="多账号切换与额度管理" width="100%" /></td>
   </tr>
 </table>
 
----
-
-## 主要功能
-
-- **多语言汉化（简 / 繁 / 英）**：翻译 Antigravity 常用侧栏、菜单、权限弹窗、模型说明、设置页和 Swarm 面板，不改动聊天正文与代码块。
-- **上下文与速度统计**：在输入框旁查看上下文窗口占用（含缓存复用、压缩次数和 Orchestrator 规划/执行分模型进度）以及生成速度（`tok/s`、首字延迟、模型/工具耗时和本会话参考费用），支持子智能体统计。
-- **本地用量与请求看板**：左侧栏新增 `Powertools` 页面，包含用量概览（热力图、模型分布、参考费用）、请求记录、短间隔缓存异常标红、报错一键复制、配额估算和官方参考单价拉取。
-- **紧凑排版与阶段汇报**：保留客户端字号，收紧正文行高和段落间距；Agent 连续调用工具时先简要汇报进度，整轮完成后自动折进顶部用时栏。
-- **会话分支与消息编辑**：可从任意历史回答或会话菜单分支出新会话（完整保留历史，支持含子智能体的会话）；点击已发消息旁的编辑按钮可直接在原位置修改重发。
-- **多账号切换（默认关闭）**：基于 Windows 凭据管理器、macOS 钥匙串或 Linux Secret Service 本地隔离多个 Google 账号，不落明文令牌；侧栏底部可直接看额度、切号，支持耗尽自动切号。
-- **免 TUN 独立代理（默认关闭）**：无需开启系统全局代理，单独给 Antigravity 注入代理参数和环境变量；内置连通性测试、冷启动未启用提醒，以及可选 `GODEBUG=http2client=0` 缓解 `EOF` 断连。
-- **SSH 远程与 WSL2 支持**：桌面端连 `SSH` 远端窗口时直接读取远端会话与用量统计，不需要在服务器装插件；Windows Antigravity 开启内置 WSL2 模式时，自动处理跨系统 CDP 连接（兼容 NAT 和 Mirrored）、多账号凭据与重启。
-- **文件右键与其他实用项**：右键消息中的文件链接或右侧文件树可引用到输入框、打开、定位文件夹、复制文件或复制路径（Windows 支持局域网 NAS 共享路径）；右侧概览支持可折叠的任务进度与当前额度，另提供窗口标题未读数、可选输入框额度边框和用户气泡底色。
+</details>
 
 ---
 
@@ -129,13 +127,13 @@
 
 把下面这段话直接发给 Antigravity 或其他可执行本地命令的 Agent：
 
-> 请帮我安装 Agy Powertools：https://github.com/WhiteBr1ck/agy-powertools 。先阅读 README 和 docs/INSTALL_AGENT.md，使用项目提供的统一安装器，优先使用已有 Node.js 或 Antigravity 自带运行环境。保留其他插件、账户设置和聊天记录，不要强制退出当前客户端。安装后核对版本并告诉我结果；需要重启时最后提醒我。
+> 请帮我安装 Agy Powertools (Codex 定制版)：https://github.com/xiejunjie168-bot/agy-powertools 。先阅读 README 和 docs/INSTALL_AGENT.md，使用项目提供的统一安装器，优先使用已有 Node.js 或 Antigravity 自带运行环境。保留其他插件、账户设置和聊天记录，不要强制退出当前客户端。安装后核对版本并告诉我结果；需要重启时最后提醒我。
 
 详细步骤见 [Agent 安装指南](docs/INSTALL_AGENT.md)。
 
 ### 方式二：命令行安装
 
-从 [Releases](https://github.com/WhiteBr1ck/agy-powertools/releases) 下载最新 ZIP 解压（或克隆本仓库），在项目目录运行：
+从 [Releases](https://github.com/xiejunjie168-bot/agy-powertools/releases) 下载最新 ZIP 解压（或克隆本仓库），在项目目录运行：
 
 ```powershell
 # Windows (PowerShell)
@@ -147,7 +145,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1
 sh ./install.sh
 ```
 
-覆盖安装会保留已有设置，不会强制关闭客户端。完成当前任务后重启 Antigravity，左侧栏出现 **Powertools** 即可使用。macOS 会自动在 `~/Applications/` 生成带原版图标的启动器，拖入 Dock 替代原图标即可。
+覆盖安装会保留已有设置，不会强制关闭客户端。完成当前任务后重启 Antigravity，左侧栏出现 **Powertools** 即可使用。macOS 无需创建第二个 `.app` 图标，正常打开原版 Antigravity 时若未检测到调试端口，插件会自动带参数重启一次生效（内置防循环保护，亦可在设置或右侧「插件 -> Powertools」关闭自动重启并改为手动点击重启）。
 
 ### 更新与卸载
 
@@ -162,6 +160,13 @@ sh ./install.sh
 
 <details>
 <summary><strong>展开查看全部设置项、环境变量与数据目录</strong></summary>
+
+### Codex 增强扩展（仅 2 项独立开关）
+
+| 配置项 | 默认值 | 说明 |
+| --- | --- | --- |
+| Codex 风格体验 | 开启 | 一键应用 Codex 排版与配色、流式工作进度、122×122 大尺寸输入框贴图及横向右键操作胶囊（自动适配 `~/.codex` 并内置默认兜底），优先于紧凑排版 |
+| 高清原图上传（≤ 3 MiB） | 开启 | 3 MiB 内原图无损直传、超限保留原始宽高自适应收敛，并同步提清缩略图，告别默认 1 MiB 压缩糊图 |
 
 ### 界面与显示
 
@@ -219,6 +224,23 @@ sh ./install.sh
 ---
 
 ## 更新日志
+
+### v1.0.0（首发，集成上游 v2.15.5）
+- **独立版本线首发 Codex 风格定制版（完整集成上游 [`WhiteBr1ck/agy-powertools`](https://github.com/WhiteBr1ck/agy-powertools) `v2.15.5`）**：
+  - **对话排版与视觉配色**：对齐 Codex 深浅画布、`48rem` 齐边列宽、1.625 行高与段距、无边框提问气泡、半透明行内代码方牌、蓝色虚线文件链接及无框横线表格，有本地 `~/.codex` 时自动适配、无则内置参数即开即用。
+  - **流式工作进度与自动收拢**：统一「日常工作」与「软件开发」实时阶段展示（取消 320px 限高滚动盒），结束后自动折拢为单行「用时 X分X秒」，无操作不留空折叠箭头，运行期间不提前误显底部操作栏。
+  - **划词与文件/图片横向右键胶囊**：左键划词、选中文本右键、以及文件/目录/产物卡片/图片/文件树右键，全面统一为 Codex 同款「添加到对话 | 在侧边聊天中提问」横向胶囊，直接覆盖原版菜单。
+  - **高清原图上传与 122×122 贴图预览**：输入框贴图自动撑高展示 `122×122` 圆角大图与悬停移除按钮，突破默认 1 MiB 压缩限制实现 `≤ 3 MiB` 无损直传与 `160 KiB` Retina 清晰度缩略图。
+  - **极简设置与汉化补充**：在首页首栏单独收拢为「Codex 风格体验」与「高清原图上传」两个极简开关，同时补齐 Antigravity 2.35+ 子智能体、后台任务、定时器与右键缺字图标等遗漏。
+
+<details>
+<summary><strong>查看上游基础版本记录（v2.10.0 - v2.15.5）</strong></summary>
+
+### v2.15.5
+- **macOS 告别双 `.app` 图标，改为冷启动自动重启启用**：
+  - 不再创建冗余的 `~/Applications/Antigravity (Powertools).app`（老用户升级或覆盖安装时自动清理旧启动器），全程直接使用原版 `/Applications/Antigravity.app`。
+  - 正常打开原版 Antigravity 时若未检测到调试端口，自动带 `--remote-debugging-port=0` 优雅退出并重启一次（移除 `osascript` 避免系统自动化权限弹窗；内置同会话防重、120 秒冷却与连续 2 次失败熔断保护）。
+  - 在 **Powertools -> 设置**（仅 macOS 显示）以及右侧原生 **插件 -> Powertools** 面板均提供「冷启动自动重启启用（macOS）」开关与手动「立即重启启用」按钮，随时可切回手动重启。
 
 ### v2.15.4
 - **修复长对话触屏拖动卡顿与 Windows 输入法悬浮栏闪烁（#37）**：给 `<html>` 样式变量加脏检查避免整页重算，给 `renderRoot` 加渲染签名跳过未变化的历史轮次重渲染，对已完成历史回复走 `WeakMap` O(1) 缓存并缓存输入框 flex 父节点；监听跳过 `[contenteditable]` 与 `[data-markdown-root]` 并在触屏拖动与输入法组合期间自动延迟挂载，同步优化 `native-i18n.js` 流式 `characterData` 过滤与节流清理。
@@ -282,8 +304,7 @@ sh ./install.sh
 - 移除 Windows 隐藏 PowerShell 任务栏闪烁调用，消除杀软误报，同时停用遗留 `hooks.json` 钩子（#20）。
 - 补全侧栏项目右键菜单、权限审批弹窗以及 `Thought for Xs`、`Step X of Y` 等高频翻译。
 
-<details>
-<summary>查看早期版本（v2.10.0 - v2.13.6）</summary>
+#### 早期版本（v2.10.0 - v2.13.6）
 
 - **v2.13.6**：精简右侧「任务进度」面板（合并实时阶段、连接线时间轴、单步耗时与右对齐计时），补全 Orchestrator 说明翻译。
 - **v2.13.5**：新增可选用户消息气泡着色，收窄请求表列宽，修复路径含 `#` 的文件链接无法打开的问题，补全 2.34.0 界面与弹窗翻译。
@@ -301,6 +322,6 @@ sh ./install.sh
 
 ## 协议与链接
 
-- **开源协议**：[MIT License](LICENSE)（日期范围日历交互改编自 HextaUI，基于 `react-day-picker` 与 `date-fns`，许可见 [lib/vendor/NOTICE.txt](lib/vendor/NOTICE.txt)）
-- **问题反馈**：[GitHub Issues](https://github.com/WhiteBr1ck/agy-powertools/issues)（提交时请附上操作系统、Antigravity 版本和插件版本）
+- **开源协议与致谢**：[MIT License](LICENSE)（基于 [`WhiteBr1ck/agy-powertools`](https://github.com/WhiteBr1ck/agy-powertools) 定制增强；日期范围日历交互改编自 HextaUI，基于 `react-day-picker` 与 `date-fns`，许可见 [lib/vendor/NOTICE.txt](lib/vendor/NOTICE.txt)）
+- **问题反馈**：[GitHub Issues](https://github.com/xiejunjie168-bot/agy-powertools/issues)（提交时请附上操作系统、Antigravity 版本和插件版本）
 - **友情链接**：[LINUX DO](https://linux.do/) - 新的理想型社区

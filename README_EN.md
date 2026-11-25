@@ -1,14 +1,15 @@
 <div align="center">
   <img src="assets/logo.svg" width="72" height="72" alt="Agy Powertools Logo" />
-  <h1>Agy Powertools</h1>
-  <p><strong>Native enhancement plugin for Antigravity 2.0</strong></p>
-  <p>Multilingual UI, context &amp; usage stats, compact layout, session branching &amp; editing, multi-account switching, no-TUN proxy, SSH &amp; WSL2 support</p>
+  <h1>Agy Powertools (Codex Edition)</h1>
+  <p><strong>Antigravity 2.0 enhancement plugin crafted to match the Codex desktop look and feel</strong></p>
+  <p>Codex typography &amp; palette, unified live progress folding, horizontal action pills, 122×122 image previews &amp; 3 MiB HD uploads, telemetry, branching, multi-account &amp; no-TUN proxy</p>
   <!-- plugin-badges:start -->
   <p>
-    <a href="https://github.com/WhiteBr1ck/agy-powertools/releases"><img src="https://img.shields.io/github/v/release/WhiteBr1ck/agy-powertools?label=Release&color=2563eb" height="20" alt="Release" /></a>
-    <a href="https://github.com/WhiteBr1ck/agy-powertools/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/WhiteBr1ck/agy-powertools/ci.yml?label=CI" height="20" alt="CI" /></a>
-    <a href="LICENSE"><img src="https://img.shields.io/github/license/WhiteBr1ck/agy-powertools?label=License&color=16a34a" height="20" alt="MIT License" /></a>
-    <img src="https://img.shields.io/badge/Antigravity-2.35.0-0f172a" height="20" alt="Antigravity 2.35.0" />
+    <a href="https://github.com/xiejunjie168-bot/agy-powertools/releases"><img src="https://img.shields.io/github/v/release/xiejunjie168-bot/agy-powertools?label=Release&color=2563eb" height="20" alt="Release" /></a>
+    <a href="https://github.com/WhiteBr1ck/agy-powertools/releases/tag/v2.15.5"><img src="https://img.shields.io/badge/Upstream-v2.15.5-64748b" height="20" alt="Upstream v2.15.5" /></a>
+    <a href="https://github.com/xiejunjie168-bot/agy-powertools/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/xiejunjie168-bot/agy-powertools/ci.yml?label=CI" height="20" alt="CI" /></a>
+    <a href="LICENSE"><img src="https://img.shields.io/github/license/xiejunjie168-bot/agy-powertools?label=License&color=16a34a" height="20" alt="MIT License" /></a>
+    <img src="https://img.shields.io/badge/Antigravity-2.35%2B-0f172a" height="20" alt="Antigravity 2.35+" />
     <img src="https://img.shields.io/badge/Node.js-%3E%3D22.13-339933" height="20" alt="Node.js >= 22.13" />
     <img src="https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux%20%7C%20WSL2-475569" height="20" alt="Platform" />
   </p>
@@ -18,8 +19,8 @@
     <strong>English</strong>
   </p>
   <p>
-    <a href="#screenshots">Screenshots</a> |
-    <a href="#features">Features</a> |
+    <a href="#codex-experience-highlights">Codex Highlights</a> |
+    <a href="#full-native-capabilities-retained">Native Features</a> |
     <a href="#installation">Installation</a> |
     <a href="#configuration">Configuration</a> |
     <a href="#changelog">Changelog</a>
@@ -27,14 +28,63 @@
 </div>
 
 <p align="center">
-  <img src="docs/images/hero-workspace.png" alt="Agy Powertools workspace" width="100%" />
+  <img src="docs/images/codex-hero-compare.svg" alt="Codex-style typography before and after comparison" width="100%" />
 </p>
 
-> Attaches to Antigravity 2.0 over the local debugging interface and reads local SQLite and JSONL session files in read-only mode. It does not patch client installation files or open external web pages.
+> Built on top of [`WhiteBr1ck/agy-powertools`](https://github.com/WhiteBr1ck/agy-powertools) (MIT License). Attaches to Antigravity 2.0 via the local debugging interface and reads local session data in read-only mode without modifying client binaries or opening external web pages.
 
 ---
 
-## Screenshots
+## Codex Experience Highlights
+
+Built for an **out-of-the-box Codex desktop feel**, grouped cleanly into five visual and interactive pillars:
+
+### 1. Conversation Typography & Palette
+- **Authentic Codex visual scale**: Matches Codex dark/light canvases, flush `48rem` column alignment, airy `1.625` line height and spacing, borderless rounded user bubbles, soft inline code pills, dashed blue file links, and clean horizontal-rule tables.
+- **Zero-config with auto-sync**: Works immediately with tuned built-in presets; silently syncs colors and font sizes from `~/.codex` when Codex is installed, and still lets you customize bubble tints anytime.
+
+### 2. Live Progress Streaming, Auto-Fold & Concise Output
+- **Unified across Knowledge Work and Software Engineering**: Removes the cramped `320px` scroll box while streaming stage updates in bright foreground and single-line muted tool summaries, hiding premature response action bars until work actually completes.
+- **One-line completion fold**: Folds prior updates, wakeups, and subagent groups into a clean `Worked for …` line on completion, suppresses empty fold chevrons on hidden notices, and keeps approval prompts inline.
+- **Global Codex output & localized tool-summary prompt**: With **Codex-style experience** enabled, automatically upgrades the dynamic `Stage updates` prompt section (without touching `~/.gemini/AGENTS.md`) to enforce conclusion-first brevity, restrained inline backticks, end-of-sentence `file://` links, and concise UI-language tool summaries, cleanly restoring the upstream rule when turned off.
+
+<p align="center">
+  <img src="docs/images/codex-progress-flow.svg" alt="Codex live progress streaming and collapsed completion comparison" width="100%" />
+</p>
+
+### 3. Horizontal Quote & Attach Action Pill
+- **Unified across all three triggers**: Left-click text selection, selection right-click, and right-clicking chat files, folders, artifact cards, images, or the Files tree all present the crisp Codex segmented pill **Add to chat | Ask in side chat**, replacing the bulky vertical menu.
+
+### 4. HD Image Uploads & Larger Composer Previews
+- **Codex-sized attachment cards**: Pasted or attached images expand the composer cleanly with crisp `122×122` rounded thumbnails (`88×88` in Side Question) and hover remove buttons.
+- **No more blurry 1 MiB downscaling**: Sends images up to 3 MiB losslessly at original resolution (adaptively compressing larger files near 3 MiB) and upgrades `10 KiB` thumbnails to `160 KiB` Retina clarity.
+
+<p align="center">
+  <img src="docs/images/codex-pill-media.svg" alt="Horizontal Codex action pill and 122x122 composer previews" width="100%" />
+</p>
+
+### 5. Minimal Two-Switch Section & Expanded Localization
+- **Clutter-free top section**: Keeps only two clear switches at the top of Settings (**Codex-style experience** and **HD original images (≤ 3 MiB)**) with full instant rollback and zero mixing into upstream sections.
+- **Completed 2.35+ translations**: Covers subagent controls, background tasks, timer notices, permission prompts, pinned chats, and image menu labels in Simplified/Traditional Chinese.
+
+<p align="center">
+  <img src="docs/images/codex-settings-clean.svg" alt="Minimal two-switch Codex Extensions settings card" width="100%" />
+</p>
+
+---
+
+## Full Native Capabilities Retained
+
+Includes every upstream `agy-powertools` telemetry, workflow, and system utility:
+
+- **Context and speed telemetry**: Composer context ring (cache reuse, compactions, Orchestrator bars), speed dial (`tok/s`, TTFT, cost), and subagent stats.
+- **Local usage & request dashboard**: `Powertools` sidebar page with 53-week heatmap, token/cost breakdown, per-request filtering, cache anomaly flags, and official API pricing lookup.
+- **Full session branching & inline edit**: Fork full-history branches (including chats with subagents) or edit sent messages in place.
+- **Multi-account & no-TUN proxy (off by default)**: OS keyring multi-account isolation with 5H/weekly quotas and per-app HTTP/SOCKS5 proxy flags.
+- **SSH remote, WSL2 & titlebar popover**: Zero-server-install SSH telemetry, Windows WSL2 bridge support, and macOS cold-start auto-relaunch.
+
+<details>
+<summary><strong>Expand to view dashboard, multi-account, and telemetry previews</strong></summary>
 
 <table>
   <tr>
@@ -42,72 +92,20 @@
     <th width="50%">Overview Task Progress &amp; Quota</th>
   </tr>
   <tr>
-    <td>
-      <img src="docs/images/card-composer.png" alt="Context window and speed stats" width="100%" />
-      <p>Check context usage, cache reuse, and generation speed next to the model selector, with an optional perimeter quota ring around the composer.</p>
-    </td>
-    <td>
-      <img src="docs/images/card-overview-panel.png" alt="Overview task progress and quota" width="100%" />
-      <p>Track live execution steps, per-step durations, and remaining model quotas in the right Overview panel; click section headers to collapse.</p>
-    </td>
+    <td><img src="docs/images/card-composer.png" alt="Context window and speed stats" width="100%" /></td>
+    <td><img src="docs/images/card-overview-panel.png" alt="Overview task progress and quota" width="100%" /></td>
   </tr>
   <tr>
-    <th>Usage Overview (Light)</th>
     <th>Usage Overview (Dark)</th>
+    <th>Multi-Account &amp; Quota Manager</th>
   </tr>
   <tr>
-    <td>
-      <img src="docs/images/card-dashboard-light.png" alt="Usage overview in light theme" width="100%" />
-      <p>Defaults to the current weekly quota cycle, displaying request counts, tokens, cache hit rate, estimated cost, a 53-week heatmap, and model health.</p>
-    </td>
-    <td>
-      <img src="docs/images/card-dashboard-dark.png" alt="Usage overview in dark theme" width="100%" />
-      <p>Follows the client light and dark themes, comparing token share, cost share, cache hit rate, and speed across models.</p>
-    </td>
-  </tr>
-  <tr>
-    <th>Requests &amp; Cache Anomalies</th>
-    <th>Multi-Account &amp; Quota Manager (Off by default)</th>
-  </tr>
-  <tr>
-    <td>
-      <img src="docs/images/card-requests.png" alt="Request events and cache anomalies" width="100%" />
-      <p>Filter requests by account, model, conversation, and status, and flag short-interval cache drops while ignoring cold starts and compactions.</p>
-    </td>
-    <td>
-      <img src="docs/images/card-accounts.png" alt="Multi-account switching and quota management" width="100%" />
-      <p>Store and switch multiple Google accounts locally via OS native keyrings, with 5-hour and weekly quota views in one place.</p>
-    </td>
-  </tr>
-  <tr>
-    <th>Language &amp; Display Settings</th>
-    <th>No-TUN Proxy (Off by default)</th>
-  </tr>
-  <tr>
-    <td>
-      <img src="docs/images/card-settings.png" alt="Language and display settings" width="100%" />
-      <p>Switch between Simplified Chinese, Traditional Chinese, and English, and toggle compact layout, user bubble tint, and quota halo window.</p>
-    </td>
-    <td>
-      <img src="docs/images/card-proxy.png" alt="No-TUN application proxy settings" width="100%" />
-      <p>Route only Antigravity through HTTP or SOCKS5 with built-in connectivity checks, Force HTTP/1.1, and in-app update verification.</p>
-    </td>
+    <td><img src="docs/images/card-dashboard-dark.png" alt="Usage overview in dark theme" width="100%" /></td>
+    <td><img src="docs/images/card-accounts.png" alt="Multi-account switching and quota management" width="100%" /></td>
   </tr>
 </table>
 
----
-
-## Features
-
-- **Multilingual UI (`English` / `简体中文` / `繁體中文`)**: Localizes Powertools panels, common Antigravity menus, permission dialogs, settings, and Swarm iframes while leaving chat text and code blocks untouched.
-- **Context and speed telemetry**: Adds a context usage ring (with cache reuse, compaction count, and Orchestrator planner/executor bars) and a speed dial (`tok/s`, TTFT, model vs. tool duration, and estimated session cost) next to the composer, including subagent stats.
-- **Local usage and request dashboard**: Adds a `Powertools` sidebar page with usage overview (53-week heatmap, token/cost donuts, model table), per-request log, short-interval cache anomaly flags, one-click error copy, quota estimates, and official API pricing refresh.
-- **Compact layout and live stage updates**: Keeps your client font size while tightening line height and block spacing; reports short progress updates during multi-step tool runs and folds them into the top duration header once finished.
-- **Session branching and inline editing**: Fork a new chat from any reply or conversation menu with full history preserved (including chats that used subagents), or edit a sent message in place using Antigravity's native composer.
-- **Multi-account switching (off by default)**: Uses Windows Credential Manager, macOS Keychain, or Linux Secret Service to keep multiple Google accounts isolated without plaintext tokens; check 5-hour/weekly quotas and switch from the sidebar, with optional auto-switch on depletion.
-- **No-TUN application proxy (off by default)**: Injects proxy flags and environment variables for Antigravity alone on relaunch, with HTTP CONNECT / SOCKS5 testing, cold-start prompts, and optional `GODEBUG=http2client=0` to reduce `EOF` disconnects.
-- **SSH remote and WSL2 support**: Reads remote session, subagent, and dashboard metrics in desktop `SSH` windows over local OpenSSH without installing anything on the server; supports Windows Antigravity with built-in WSL2 backends across NAT and Mirrored networking, hybrid credential storage, and relaunch delegation.
-- **File context menu and small utilities**: Right-click file links or Files tree entries to attach to chat, open, reveal in folder, copy the file, or copy its path (including LAN NAS / SMB paths on Windows); adds collapsible Overview Task Progress and Quota panels, titlebar unread counts, optional composer quota ring, and optional user bubble tint.
+</details>
 
 ---
 
@@ -129,13 +127,13 @@
 
 Send this prompt to Antigravity or another local coding agent:
 
-> Please install Agy Powertools from https://github.com/WhiteBr1ck/agy-powertools . Read README_EN.md and docs/INSTALL_AGENT.md first, and run the unified installer provided by the project using local Node.js or Antigravity's bundled runtime. Keep all other plugins, account settings, and chat history intact, and do not force-close the running client. Verify the installed version afterward and remind me if a client restart is needed.
+> Please install Agy Powertools (Codex Edition) from https://github.com/xiejunjie168-bot/agy-powertools . Read README_EN.md and docs/INSTALL_AGENT.md first, and run the unified installer provided by the project using local Node.js or Antigravity's bundled runtime. Keep all other plugins, account settings, and chat history intact, and do not force-close the running client. Verify the installed version afterward and remind me if a client restart is needed.
 
 See [Agent installation guide](docs/INSTALL_AGENT.md) for details.
 
 ### Option 2: Command line
 
-Download and extract the latest ZIP from [Releases](https://github.com/WhiteBr1ck/agy-powertools/releases) (or clone this repository), then run:
+Download and extract the latest ZIP from [Releases](https://github.com/xiejunjie168-bot/agy-powertools/releases) (or clone this repository), then run:
 
 ```powershell
 # Windows (PowerShell)
@@ -147,7 +145,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1
 sh ./install.sh
 ```
 
-Reinstalling keeps your saved settings and does not force-close Antigravity. Restart Antigravity once you finish your current task; **Powertools** will appear in the left sidebar. On macOS, a launcher app with the native icon is generated in `~/Applications/` so you can drag it into your Dock.
+Reinstalling keeps your saved settings and does not force-close Antigravity. Restart Antigravity once you finish your current task; **Powertools** will appear in the left sidebar. On macOS, no duplicate `.app` launcher is created: opening the original `Antigravity.app` automatically relaunches once with the debug flag when needed (with built-in loop protection, and a toggle in Settings or Plugins -> Powertools to switch to manual restart anytime).
 
 ### Updates and uninstall
 
@@ -162,6 +160,13 @@ Every setting applies live in **Powertools -> Settings** and saves automatically
 
 <details>
 <summary><strong>Expand all settings, environment variables, and paths</strong></summary>
+
+### Codex Extensions (2 clean top-level switches)
+
+| Setting | Default | Description |
+| --- | --- | --- |
+| Codex-style experience | On | Applies Codex typography and palette, live progress timeline, 122×122 composer previews, and horizontal action pills (auto-syncs `~/.codex` with built-in defaults), overriding Compact layout |
+| HD original images (≤ 3 MiB) | On | Sends images up to 3 MiB losslessly at original dimensions (adaptively compresses larger files near 3 MiB) and upgrades thumbnails instead of 1 MiB downscaling |
 
 ### Interface & display
 
@@ -219,6 +224,23 @@ Every setting applies live in **Powertools -> Settings** and saves automatically
 ---
 
 ## Changelog
+
+### v1.0.0 (Initial Release, synced with upstream v2.15.5)
+- **Independent Codex Edition release (integrating all features from [`WhiteBr1ck/agy-powertools`](https://github.com/WhiteBr1ck/agy-powertools) `v2.15.5`)**:
+  - **Conversation typography & palette**: Matches Codex light/dark canvases, flush `48rem` alignment, `1.625` line height and spacing, borderless user bubbles, soft inline code pills, dashed blue file links, and horizontal-rule tables (auto-adapts `~/.codex` when present or falls back seamlessly to built-in defaults).
+  - **Live progress streaming & auto-fold**: Unifies Knowledge Work and Software Engineering stage streaming without the `320px` scroll box, hides premature action bars while working, folds completed steps into a clean `Worked for …` header, and suppresses empty chevrons on hidden notices.
+  - **Horizontal quote & attach action pill**: Unifies text selection, selection right-click, and chat file/folder/artifact/image/Files tree right-click into Codex's **Add to chat | Ask in side chat** segmented pill, overriding the vertical menu.
+  - **HD image uploads & 122×122 composer previews**: Expands the composer cleanly with `122×122` rounded thumbnails and hover remove badges, sends images up to 3 MiB losslessly, and boosts thumbnails to `160 KiB` Retina clarity.
+  - **Minimal two-switch section & 2.35+ localization**: Consolidates all custom controls into two switches at the top of Settings and fills remaining subagent, background task, timer, approval, and icon glyph gaps.
+
+<details>
+<summary><strong>View upstream base release history (v2.10.0 - v2.15.5)</strong></summary>
+
+### v2.15.5
+- **macOS single-app launch with automatic cold-start relaunch**:
+  - No longer creates a duplicate `~/Applications/Antigravity (Powertools).app` wrapper (automatically cleans up legacy wrappers on upgrade) so you simply open the original `/Applications/Antigravity.app`.
+  - Automatically relaunches once with `--remote-debugging-port=0` on cold start when the debug port is absent (drops `osascript` to avoid macOS Automation permission prompts, guarded by per-session tracking, a 120s cooldown, and a 2-attempt circuit breaker).
+  - Adds an opt-out **Auto-relaunch on cold start (macOS)** toggle in both **Powertools -> Settings** (macOS only) and the native **Plugins -> Powertools** side pane alongside the manual **Restart to Enable** button.
 
 ### v2.15.4
 - **Fix long-conversation touch-scroll lag and Windows IME toolbar flicker (#37)**: Added dirty checks for `<html>` style properties, render-signature skipping for unchanged historical turns, WeakMap caching for completed responses and flex anchors, `[contenteditable]` / `[data-markdown-root]` observer filtering, touch-drag and IME composition mount deferral, and throttled pruning in `native-i18n.js`.
@@ -281,8 +303,7 @@ Every setting applies live in **Powertools -> Settings** and saves automatically
 - Removed Windows hidden PowerShell taskbar flashing calls to prevent AV false positives, and disabled the unused legacy `hooks.json` hook (#20).
 - Added translations for sidebar project menus, permission approval dialogs, `Thought for Xs`, and `Step X of Y`.
 
-<details>
-<summary>View earlier releases (v2.10.0 - v2.13.6)</summary>
+#### Earlier releases (v2.10.0 - v2.13.6)
 
 - **v2.13.6**: Streamlined Overview Task Progress with integrated live phase header, connected timeline, per-step durations, live timer, and Orchestrator tooltip translation.
 - **v2.13.5**: Added opt-in User Message Bubble Tint, tightened Requests table columns, fixed `#` paths in `file://` links, and expanded 2.34.0 translations.
@@ -300,6 +321,6 @@ Every setting applies live in **Powertools -> Settings** and saves automatically
 
 ## License & Links
 
-- **License**: [MIT License](LICENSE) (custom date-range calendar adapted from HextaUI using `react-day-picker` and `date-fns`; see [lib/vendor/NOTICE.txt](lib/vendor/NOTICE.txt))
-- **Issues**: [GitHub Issues](https://github.com/WhiteBr1ck/agy-powertools/issues) (please include OS, Antigravity version, and plugin version)
+- **License & Attribution**: [MIT License](LICENSE) (Codex Edition built on [`WhiteBr1ck/agy-powertools`](https://github.com/WhiteBr1ck/agy-powertools); custom date-range calendar adapted from HextaUI using `react-day-picker` and `date-fns`; see [lib/vendor/NOTICE.txt](lib/vendor/NOTICE.txt))
+- **Issues**: [GitHub Issues](https://github.com/xiejunjie168-bot/agy-powertools/issues) (please include OS, Antigravity version, and plugin version)
 - **Community**: [LINUX DO](https://linux.do/)

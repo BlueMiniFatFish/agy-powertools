@@ -1,8 +1,8 @@
 {
   "name": "agy-powertools",
-  "displayName": "Agy Powertools",
-  "version": "2.15.4",
-  "description": "Native UI enhancements, Codex-style stage updates and compact layout, session branching, context telemetry, and usage dashboard for Antigravity 2.0.",
+  "displayName": "Agy Powertools (Codex)",
+  "version": "1.0.0",
+  "description": "Codex-style Antigravity 2.0 enhancement plugin: Codex typography & theme sync, unified streaming progress timeline, horizontal quote/attach pills, HD original image upload, session branching, context telemetry, and usage dashboard.",
   "logo": "assets/logo.svg",
   "suggestedPrompts": [
     "Branch the current session from a previous turn",
