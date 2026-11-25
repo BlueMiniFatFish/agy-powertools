@@ -835,3 +835,96 @@ test('parseFileUriAnchor, discoverOpenWithApps, and openFileWithApp detect insta
     rmSync(dir, { recursive: true, force: true });
   }
 });
+
+
+test('maybeAutoRelaunchProxy automatically relaunches once on cold start when non-TUN proxy is configured and reachable, skips when unreachable, and guards against loops', async () => {
+  const { maybeAutoRelaunchProxy, recordProxyReady } = await import('../lib/launcher.mjs');
+  const root = mkdtempSync(join(tmpdir(), 'agy-proxy-auto-'));
+  try {
+    const dataDir = join(root, 'data');
+    mkdirSync(dataDir, { recursive: true });
+    let relaunchedCount = 0;
+    const fakeRelaunch = () => { relaunchedCount++; return { scheduled: true }; };
+    const env = { ANTIGRAVITY_LS_ADDRESS: '127.0.0.1:41001', LOCALAPPDATA: root };
+    const fakeExe = join(root, 'Programs', 'antigravity', 'Antigravity.exe');
+    mkdirSync(join(root, 'Programs', 'antigravity'), { recursive: true });
+    writeFileSync(fakeExe, '');
+
+    // 1. Proxy port unreachable -> must NOT relaunch
+    const rUnreach = await maybeAutoRelaunchProxy({
+      dataDir, home: root, platform: 'win32', env,
+      enabled: true, proxyEnabled: true, proxyUrl: 'http://127.0.0.1:7897',
+      runtimeProxyReason: 'not-applied', now: 1_000_000,
+      checkPort: async () => ({ ok: false, error: 'closed' }),
+      relaunch: fakeRelaunch
+    });
+    assert.equal(rUnreach.relaunched, false);
+    assert.equal(rUnreach.reason, 'proxy-unreachable');
+    assert.equal(relaunchedCount, 0);
+
+    // 2. Proxy port open -> relaunches once
+    const rOk = await maybeAutoRelaunchProxy({
+      dataDir, home: root, platform: 'win32', env,
+      enabled: true, proxyEnabled: true, proxyUrl: 'http://127.0.0.1:7897',
+      runtimeProxyReason: 'not-applied', now: 1_000_000,
+      checkPort: async () => ({ ok: true }),
+      relaunch: fakeRelaunch
+    });
+    assert.equal(rOk.relaunched, true);
+    assert.equal(relaunchedCount, 1);
+
+    // 3. Same LS session -> blocked by already-attempted-session
+    const rSame = await maybeAutoRelaunchProxy({
+      dataDir, home: root, platform: 'win32', env,
+      enabled: true, proxyEnabled: true, proxyUrl: 'http://127.0.0.1:7897',
+      runtimeProxyReason: 'not-applied', now: 1_500_000,
+      checkPort: async () => ({ ok: true }),
+      relaunch: fakeRelaunch
+    });
+    assert.equal(rSame.relaunched, false);
+    assert.equal(rSame.reason, 'already-attempted-session');
+
+    // 4. New session within cooldown -> blocked by cooldown
+    const rCool = await maybeAutoRelaunchProxy({
+      dataDir, home: root, platform: 'win32', env: { ...env, ANTIGRAVITY_LS_ADDRESS: '127.0.0.1:41002' },
+      enabled: true, proxyEnabled: true, proxyUrl: 'http://127.0.0.1:7897',
+      runtimeProxyReason: 'not-applied', now: 1_030_000,
+      checkPort: async () => ({ ok: true }),
+      relaunch: fakeRelaunch
+    });
+    assert.equal(rCool.relaunched, false);
+    assert.equal(rCool.reason, 'cooldown');
+
+    // 5. Second consecutive failure opens circuit breaker on 3rd attempt; recordProxyReady resets it
+    await maybeAutoRelaunchProxy({
+      dataDir, home: root, platform: 'win32', env: { ...env, ANTIGRAVITY_LS_ADDRESS: '127.0.0.1:41003' },
+      enabled: true, proxyEnabled: true, proxyUrl: 'http://127.0.0.1:7897',
+      runtimeProxyReason: 'not-applied', now: 1_300_000,
+      checkPort: async () => ({ ok: true }),
+      relaunch: fakeRelaunch
+    });
+    assert.equal(relaunchedCount, 2);
+    const rCircuit = await maybeAutoRelaunchProxy({
+      dataDir, home: root, platform: 'win32', env: { ...env, ANTIGRAVITY_LS_ADDRESS: '127.0.0.1:41004' },
+      enabled: true, proxyEnabled: true, proxyUrl: 'http://127.0.0.1:7897',
+      runtimeProxyReason: 'not-applied', now: 1_600_000,
+      checkPort: async () => ({ ok: true }),
+      relaunch: fakeRelaunch
+    });
+    assert.equal(rCircuit.relaunched, false);
+    assert.equal(rCircuit.reason, 'circuit-open');
+
+    recordProxyReady({ dataDir });
+    const rReset = await maybeAutoRelaunchProxy({
+      dataDir, home: root, platform: 'win32', env: { ...env, ANTIGRAVITY_LS_ADDRESS: '127.0.0.1:41005' },
+      enabled: true, proxyEnabled: true, proxyUrl: 'http://127.0.0.1:7897',
+      runtimeProxyReason: 'not-applied', now: 1_900_000,
+      checkPort: async () => ({ ok: true }),
+      relaunch: fakeRelaunch
+    });
+    assert.equal(rReset.relaunched, true);
+    assert.equal(relaunchedCount, 3);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});

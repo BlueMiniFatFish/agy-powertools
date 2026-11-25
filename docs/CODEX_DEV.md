@@ -7,7 +7,7 @@
 ## 1. 仓库与分支约定及同步流程
 
 - `upstream`：`https://github.com/WhiteBr1ck/agy-powertools.git`（上游原仓库）
-- `origin`：`https://github.com/xiejunjie168-bot/agy-powertools.git`（自有定制版对外发布仓库，当前发行版 `v1.0.0`，集成上游 `v2.15.5`）
+- `origin`：`https://github.com/xiejunjie168-bot/agy-powertools.git`（自有定制版对外发布仓库，当前发行版 `v1.1.0`，集成上游 `v2.16.1`）
 - `main` / `feat/codex-style`：默认主分支与开发分支均同步包含 Codex 定制版改动，`project.json` 已切换至 `origin` 发布源
 
 ```bash
@@ -92,5 +92,5 @@ npm run install:local
    - 状态同步函数调用 `installRequestOverrides()` 时必须外层 `try/catch` 容错未挂载对话视图（`/powertools` 设置页或无对话窗场景）。
 5. **国际化与文案规范**：
    - 所有新增 UI 文案统一使用 `text('简体', 'English')`；繁化转换依赖 `lib/zh-tw.mjs`，新增简体汉字需确保已收录转换映射，提交前必须通过 `tests/i18n.test.mjs` 的 `simplifiedOnly` 全文扫描。
-   - **严禁使用中点（`·`）作为状态、耗时或UI文本分隔符**（遵循项目 `AGENTS.md` 规则）。
+   - **严禁使用中点符号作为状态、耗时或 UI 文本分隔符**（遵循项目 `AGENTS.md` 规则）。
 6. **验证与安装交付清单**：每次改动交付前必须按序执行 `node --check` 语法校验、`npm test`（0 失败）、`node scripts/build-release.mjs` 构建校验；需要同步到本机试用时运行 `npm run install:local` 并提醒完整退出重启（`Cmd + Q`）Antigravity。

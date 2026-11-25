@@ -1,7 +1,7 @@
 {
   "name": "agy-powertools",
   "displayName": "Agy Powertools (Codex)",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Codex-style Antigravity 2.0 enhancement plugin: Codex typography & theme sync, unified streaming progress timeline, horizontal quote/attach pills, HD original image upload, session branching, context telemetry, and usage dashboard.",
   "logo": "assets/logo.svg",
   "suggestedPrompts": [

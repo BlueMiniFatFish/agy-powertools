@@ -6,7 +6,7 @@
   <!-- plugin-badges:start -->
   <p>
     <a href="https://github.com/xiejunjie168-bot/agy-powertools/releases"><img src="https://img.shields.io/github/v/release/xiejunjie168-bot/agy-powertools?label=Release&color=2563eb" height="20" alt="Release" /></a>
-    <a href="https://github.com/WhiteBr1ck/agy-powertools/releases/tag/v2.15.5"><img src="https://img.shields.io/badge/Upstream-v2.15.5-64748b" height="20" alt="Upstream v2.15.5" /></a>
+    <a href="https://github.com/WhiteBr1ck/agy-powertools/releases/tag/v2.16.1"><img src="https://img.shields.io/badge/Upstream-v2.16.1-64748b" height="20" alt="Upstream v2.16.1" /></a>
     <a href="https://github.com/xiejunjie168-bot/agy-powertools/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/xiejunjie168-bot/agy-powertools/ci.yml?label=CI" height="20" alt="CI" /></a>
     <a href="LICENSE"><img src="https://img.shields.io/github/license/xiejunjie168-bot/agy-powertools?label=License&color=16a34a" height="20" alt="MIT License" /></a>
     <img src="https://img.shields.io/badge/Antigravity-2.35%2B-0f172a" height="20" alt="Antigravity 2.35+" />
@@ -224,6 +224,14 @@ sh ./install.sh
 ---
 
 ## 更新日志
+
+### v1.1.0（同步集成上游 v2.16.0 - v2.16.1）
+- **Codex 扩展覆盖机制与兼容性强化**：
+  - 完整集成上游 [`WhiteBr1ck/agy-powertools`](https://github.com/WhiteBr1ck/agy-powertools) `v2.16.0` 至 `v2.16.1` 全部功能更新，并确保对话排版样式、工作进度流、右键横向胶囊与高清原图上传始终覆盖原版交互；关闭 Codex 风格开关时，聊天内联图片右键自动平滑回退至上游新版图片右键菜单（引用、复制与保存）。
+- **同步上游 `v2.16.0` - `v2.16.1` 新增与修复**：
+  - 概览新增 3D 粒子思考球 `ThinkingOrb`、主题自适应提示气泡，以及正式标准价 / API 首发优惠两种费用估算口径切换。
+  - 新增「仅复制最终回答」提取（自动过滤中间推理、文件与工具详情）、`/compact` 压缩检查点瞬时上下文估算，以及非 TUN 代理冷启动自动重连与侧边栏降级入口。
+  - 新增多账号切换与自动切号的模型兼容性保护及倒计时交互横幅、修正 SSH 远程主机概览筛选与子智能体数据分批拉取，同时瘦身发布包体积。
 
 ### v1.0.0（首发，集成上游 v2.15.5）
 - **独立版本线首发 Codex 风格定制版（完整集成上游 [`WhiteBr1ck/agy-powertools`](https://github.com/WhiteBr1ck/agy-powertools) `v2.15.5`）**：

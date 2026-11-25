@@ -6,7 +6,7 @@
   <!-- plugin-badges:start -->
   <p>
     <a href="https://github.com/xiejunjie168-bot/agy-powertools/releases"><img src="https://img.shields.io/github/v/release/xiejunjie168-bot/agy-powertools?label=Release&color=2563eb" height="20" alt="Release" /></a>
-    <a href="https://github.com/WhiteBr1ck/agy-powertools/releases/tag/v2.15.5"><img src="https://img.shields.io/badge/Upstream-v2.15.5-64748b" height="20" alt="Upstream v2.15.5" /></a>
+    <a href="https://github.com/WhiteBr1ck/agy-powertools/releases/tag/v2.16.1"><img src="https://img.shields.io/badge/Upstream-v2.16.1-64748b" height="20" alt="Upstream v2.16.1" /></a>
     <a href="https://github.com/xiejunjie168-bot/agy-powertools/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/xiejunjie168-bot/agy-powertools/ci.yml?label=CI" height="20" alt="CI" /></a>
     <a href="LICENSE"><img src="https://img.shields.io/github/license/xiejunjie168-bot/agy-powertools?label=License&color=16a34a" height="20" alt="MIT License" /></a>
     <img src="https://img.shields.io/badge/Antigravity-2.35%2B-0f172a" height="20" alt="Antigravity 2.35+" />
@@ -224,6 +224,14 @@ Every setting applies live in **Powertools -> Settings** and saves automatically
 ---
 
 ## Changelog
+
+### v1.1.0 (Synced with upstream v2.16.0 - v2.16.1)
+- **Guaranteed Codex override & smooth fallback**:
+  - Integrates all updates from [`WhiteBr1ck/agy-powertools`](https://github.com/WhiteBr1ck/agy-powertools) `v2.16.0` through `v2.16.1` while guaranteeing that Codex typography, live progress streaming, horizontal quote/attach pills, and HD image uploads override upstream rules; turning off Codex Style cleanly falls back to upstream's new chat image context menu (attach, copy, save).
+- **Upstream `v2.16.0` - `v2.16.1` highlights integrated**:
+  - Adds the Overview 3D `ThinkingOrb` particle sphere, theme-adaptive delegated tooltips, and standard vs. API promo pricing-basis toggle.
+  - Adds final-answer-only Copy extraction, instant `/compact` checkpoint ring estimation, and automatic non-TUN proxy cold-start relaunch with a Sidecar fallback action.
+  - Adds multi-account model-compatibility guards and interactive auto-switch countdown banners, fixes SSH host overview filtering and batched subagent telemetry, and slims release bundles by excluding README screenshots.
 
 ### v1.0.0 (Initial Release, synced with upstream v2.15.5)
 - **Independent Codex Edition release (integrating all features from [`WhiteBr1ck/agy-powertools`](https://github.com/WhiteBr1ck/agy-powertools) `v2.15.5`)**:

@@ -113,6 +113,11 @@ test('Swarm UI strings translate cleanly in zh-CN and zh-TW without middle dots 
   assert.equal(t('Copy to clipboard', 'zh-TW'), '複製到剪貼簿');
   assert.equal(t('Attach to chat', 'zh-CN'), '引用到输入框');
   assert.equal(t('Attach to chat', 'zh-TW'), '引用到輸入框');
+  assert.equal(t('Pinned Conversations', 'zh-CN'), '置顶会话');
+  assert.equal(t('Pinned Conversations', 'zh-TW'), '置頂會話');
+  assert.equal(t('Copy Image', 'zh-CN'), '复制图片');
+  assert.equal(t('Save Image', 'zh-CN'), '保存图片');
+  assert.equal(t('Save Image', 'zh-TW'), '儲存圖片');
   const ovLabel = t(`overview \u00b7 from the narrator\u2019s notes`, 'zh-CN');
   assert.equal(ovLabel, '概览 - 来自旁白笔记');
   assert.equal(ovLabel.includes('\u00b7'), false);
