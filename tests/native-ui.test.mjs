@@ -2727,6 +2727,10 @@ test('Codex UI hides disabled response toolbar during mid-turn follow-up and ren
   assert.match(css, /fieldset\[disabled\]:has\(\[data-testid="cascade-system-message-toolbar"\]\)\{display:none!important\}/);
   assert.match(css, /border-bottom:0!important/);
   assert.match(css, /\[data-agy-powertools-root="composer-quotes"\]\{order:10/);
+  assert.match(css, /div\.my-2\.rounded-xl\.bg-muted.*border-radius:12px/);
+  assert.match(css, /\[data-testid="quote-scope-pill"\],\[data-testid="side-question-quote-pill"\]/);
+  assert.match(css, /\[data-testid="cascade-system-message-toolbar"\]:not\(:has\(\[data-testid="idle-status-text"\]\)\) > div:has\(button\[aria-label="Copy"\]/);
+  assert.match(css, /\.animate-shimmer-text > \.shimmer-text-mask/);
 
   // 2. Annotation pill mounts above editor with '1 条注释' and opens popover on click
   const quoteMount = inner.children.find(c => c.dataset?.agyPowertoolsRoot === 'composer-quotes');
