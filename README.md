@@ -5,10 +5,10 @@
   <p>Codex 排版与配色对齐、流式工作进度收拢、横向右键胶囊、122×122 高清贴图与 3 MiB 原图直传、用量统计、会话分支、多账号与免 TUN 代理</p>
   <!-- plugin-badges:start -->
   <p>
-    <a href="https://github.com/xiejunjie168-bot/agy-powertools/releases"><img src="https://img.shields.io/github/v/release/xiejunjie168-bot/agy-powertools?label=Release&color=2563eb" height="20" alt="Release" /></a>
+    <a href="https://github.com/BlueMiniFatFish/agy-powertools/releases"><img src="https://img.shields.io/github/v/release/BlueMiniFatFish/agy-powertools?label=Release&color=2563eb" height="20" alt="Release" /></a>
     <a href="https://github.com/WhiteBr1ck/agy-powertools/releases/tag/v2.16.3"><img src="https://img.shields.io/badge/Upstream-v2.16.3-64748b" height="20" alt="Upstream v2.16.3" /></a>
-    <a href="https://github.com/xiejunjie168-bot/agy-powertools/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/xiejunjie168-bot/agy-powertools/ci.yml?label=CI" height="20" alt="CI" /></a>
-    <a href="LICENSE"><img src="https://img.shields.io/github/license/xiejunjie168-bot/agy-powertools?label=License&color=16a34a" height="20" alt="MIT License" /></a>
+    <a href="https://github.com/BlueMiniFatFish/agy-powertools/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/BlueMiniFatFish/agy-powertools/ci.yml?label=CI" height="20" alt="CI" /></a>
+    <a href="LICENSE"><img src="https://img.shields.io/github/license/BlueMiniFatFish/agy-powertools?label=License&color=16a34a" height="20" alt="MIT License" /></a>
     <img src="https://img.shields.io/badge/Antigravity-2.35%2B-0f172a" height="20" alt="Antigravity 2.35+" />
     <img src="https://img.shields.io/badge/Node.js-%3E%3D22.13-339933" height="20" alt="Node.js >= 22.13" />
     <img src="https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux%20%7C%20WSL2-475569" height="20" alt="Platform" />
@@ -127,13 +127,13 @@
 
 把下面这段话直接发给 Antigravity 或其他可执行本地命令的 Agent：
 
-> 请帮我安装 Agy Powertools (Codex 定制版)：https://github.com/xiejunjie168-bot/agy-powertools 。先阅读 README 和 docs/INSTALL_AGENT.md，使用项目提供的统一安装器，优先使用已有 Node.js 或 Antigravity 自带运行环境。保留其他插件、账户设置和聊天记录，不要强制退出当前客户端。安装后核对版本并告诉我结果；需要重启时最后提醒我。
+> 请帮我安装 Agy Powertools (Codex 定制版)：https://github.com/BlueMiniFatFish/agy-powertools 。先阅读 README 和 docs/INSTALL_AGENT.md，使用项目提供的统一安装器，优先使用已有 Node.js 或 Antigravity 自带运行环境。保留其他插件、账户设置和聊天记录，不要强制退出当前客户端。安装后核对版本并告诉我结果；需要重启时最后提醒我。
 
 详细步骤见 [Agent 安装指南](docs/INSTALL_AGENT.md)。
 
 ### 方式二：命令行安装
 
-从 [Releases](https://github.com/xiejunjie168-bot/agy-powertools/releases) 下载最新 ZIP 解压（或克隆本仓库），在项目目录运行：
+从 [Releases](https://github.com/BlueMiniFatFish/agy-powertools/releases) 下载最新 ZIP 解压（或克隆本仓库），在项目目录运行：
 
 ```powershell
 # Windows (PowerShell)
@@ -332,5 +332,5 @@ sh ./install.sh
 ## 协议与链接
 
 - **开源协议与致谢**：[MIT License](LICENSE)（基于 [`WhiteBr1ck/agy-powertools`](https://github.com/WhiteBr1ck/agy-powertools) 定制增强；日期范围日历交互改编自 HextaUI，基于 `react-day-picker` 与 `date-fns`，许可见 [lib/vendor/NOTICE.txt](lib/vendor/NOTICE.txt)）
-- **问题反馈**：[GitHub Issues](https://github.com/xiejunjie168-bot/agy-powertools/issues)（提交时请附上操作系统、Antigravity 版本和插件版本）
+- **问题反馈**：[GitHub Issues](https://github.com/BlueMiniFatFish/agy-powertools/issues)（提交时请附上操作系统、Antigravity 版本和插件版本）
 - **友情链接**：[LINUX DO](https://linux.do/) - 新的理想型社区

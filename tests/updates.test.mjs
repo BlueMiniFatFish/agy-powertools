@@ -27,6 +27,12 @@ test('update check queries only published releases and reports unavailable versi
   for(const [code,status] of [[404,'no-release'],[429,'rate-limited'],[403,'rate-limited']])assert.equal((await checkForUpdates({...options,fetcher:async()=>new Response('',{status:code})})).status,status);
   assert.equal((await checkForUpdates({...options,fetcher:async()=>new Response(JSON.stringify({tag_name:'v2.11.0'}))})).status,'current');
   assert.equal((await checkForUpdates({...options,fetcher:async()=>new Response(JSON.stringify({tag_name:'v2.12.0',prerelease:true}))})).status,'unsupported-release');
+  const apiRedirect=new Response(JSON.stringify({tag_name:'v2.12.0'}));
+  Object.defineProperty(apiRedirect,'url',{value:'https://api.github.com/repositories/123/releases/latest'});
+  assert.equal((await checkForUpdates({...options,fetcher:async()=>apiRedirect})).version,'2.12.0');
+  const evilRedirect=new Response(JSON.stringify({tag_name:'v2.12.0'}));
+  Object.defineProperty(evilRedirect,'url',{value:'https://evil.example/releases/latest'});
+  await assert.rejects(()=>checkForUpdates({...options,fetcher:async()=>evilRedirect}),/跳转地址无效/);
   await assert.rejects(()=>checkForUpdates({...options,fetcher:async()=>{throw Error('offline');}}),/offline/);
   await assert.rejects(()=>checkForUpdates({...options,fetcher:async()=>new Response('{bad json')}));
 });

@@ -22,7 +22,7 @@
 
 ### 方式一：发给 Agent 自动安装（推荐）
 
-> 请帮我安装或升级 Agy Powertools (Codex 定制版)：https://github.com/xiejunjie168-bot/agy-powertools 。先阅读 README 和 docs/INSTALL_AGENT.md，使用项目提供的统一安装器，优先使用已有 Node.js 或 Antigravity 自带运行环境。保留其他插件、账户设置和聊天记录，不要强制退出当前客户端。安装后核对版本并告诉我结果；需要重启时最后提醒我。
+> 请帮我安装或升级 Agy Powertools (Codex 定制版)：https://github.com/BlueMiniFatFish/agy-powertools 。先阅读 README 和 docs/INSTALL_AGENT.md，使用项目提供的统一安装器，优先使用已有 Node.js 或 Antigravity 自带运行环境。保留其他插件、账户设置和聊天记录，不要强制退出当前客户端。安装后核对版本并告诉我结果；需要重启时最后提醒我。
 
 ### 方式二：手动下载安装
 

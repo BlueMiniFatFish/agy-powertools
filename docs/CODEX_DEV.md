@@ -7,7 +7,7 @@
 ## 1. 仓库与分支约定及同步流程
 
 - `upstream`：`https://github.com/WhiteBr1ck/agy-powertools.git`（上游原仓库）
-- `origin`：`https://github.com/xiejunjie168-bot/agy-powertools.git`（自有定制版对外发布仓库，当前发行版 `v1.1.0`，集成上游 `v2.16.3`）
+- `origin`：`https://github.com/BlueMiniFatFish/agy-powertools.git`（自有定制版对外发布仓库，当前发行版 `v1.1.0`，集成上游 `v2.16.3`）
 - `main` / `feat/codex-style`：默认主分支与开发分支均同步包含 Codex 定制版改动，`project.json` 已切换至 `origin` 发布源
 
 ```bash

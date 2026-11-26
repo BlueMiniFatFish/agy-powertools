@@ -5,10 +5,10 @@
   <p>Codex typography &amp; palette, unified live progress folding, horizontal action pills, 122×122 image previews &amp; 3 MiB HD uploads, telemetry, branching, multi-account &amp; no-TUN proxy</p>
   <!-- plugin-badges:start -->
   <p>
-    <a href="https://github.com/xiejunjie168-bot/agy-powertools/releases"><img src="https://img.shields.io/github/v/release/xiejunjie168-bot/agy-powertools?label=Release&color=2563eb" height="20" alt="Release" /></a>
+    <a href="https://github.com/BlueMiniFatFish/agy-powertools/releases"><img src="https://img.shields.io/github/v/release/BlueMiniFatFish/agy-powertools?label=Release&color=2563eb" height="20" alt="Release" /></a>
     <a href="https://github.com/WhiteBr1ck/agy-powertools/releases/tag/v2.16.3"><img src="https://img.shields.io/badge/Upstream-v2.16.3-64748b" height="20" alt="Upstream v2.16.3" /></a>
-    <a href="https://github.com/xiejunjie168-bot/agy-powertools/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/xiejunjie168-bot/agy-powertools/ci.yml?label=CI" height="20" alt="CI" /></a>
-    <a href="LICENSE"><img src="https://img.shields.io/github/license/xiejunjie168-bot/agy-powertools?label=License&color=16a34a" height="20" alt="MIT License" /></a>
+    <a href="https://github.com/BlueMiniFatFish/agy-powertools/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/BlueMiniFatFish/agy-powertools/ci.yml?label=CI" height="20" alt="CI" /></a>
+    <a href="LICENSE"><img src="https://img.shields.io/github/license/BlueMiniFatFish/agy-powertools?label=License&color=16a34a" height="20" alt="MIT License" /></a>
     <img src="https://img.shields.io/badge/Antigravity-2.35%2B-0f172a" height="20" alt="Antigravity 2.35+" />
     <img src="https://img.shields.io/badge/Node.js-%3E%3D22.13-339933" height="20" alt="Node.js >= 22.13" />
     <img src="https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux%20%7C%20WSL2-475569" height="20" alt="Platform" />
@@ -127,13 +127,13 @@ Includes every upstream `agy-powertools` telemetry, workflow, and system utility
 
 Send this prompt to Antigravity or another local coding agent:
 
-> Please install Agy Powertools (Codex Edition) from https://github.com/xiejunjie168-bot/agy-powertools . Read README_EN.md and docs/INSTALL_AGENT.md first, and run the unified installer provided by the project using local Node.js or Antigravity's bundled runtime. Keep all other plugins, account settings, and chat history intact, and do not force-close the running client. Verify the installed version afterward and remind me if a client restart is needed.
+> Please install Agy Powertools (Codex Edition) from https://github.com/BlueMiniFatFish/agy-powertools . Read README_EN.md and docs/INSTALL_AGENT.md first, and run the unified installer provided by the project using local Node.js or Antigravity's bundled runtime. Keep all other plugins, account settings, and chat history intact, and do not force-close the running client. Verify the installed version afterward and remind me if a client restart is needed.
 
 See [Agent installation guide](docs/INSTALL_AGENT.md) for details.
 
 ### Option 2: Command line
 
-Download and extract the latest ZIP from [Releases](https://github.com/xiejunjie168-bot/agy-powertools/releases) (or clone this repository), then run:
+Download and extract the latest ZIP from [Releases](https://github.com/BlueMiniFatFish/agy-powertools/releases) (or clone this repository), then run:
 
 ```powershell
 # Windows (PowerShell)
@@ -331,5 +331,5 @@ Every setting applies live in **Powertools -> Settings** and saves automatically
 ## License & Links
 
 - **License & Attribution**: [MIT License](LICENSE) (Codex Edition built on [`WhiteBr1ck/agy-powertools`](https://github.com/WhiteBr1ck/agy-powertools); custom date-range calendar adapted from HextaUI using `react-day-picker` and `date-fns`; see [lib/vendor/NOTICE.txt](lib/vendor/NOTICE.txt))
-- **Issues**: [GitHub Issues](https://github.com/xiejunjie168-bot/agy-powertools/issues) (please include OS, Antigravity version, and plugin version)
+- **Issues**: [GitHub Issues](https://github.com/BlueMiniFatFish/agy-powertools/issues) (please include OS, Antigravity version, and plugin version)
 - **Community**: [LINUX DO](https://linux.do/)
